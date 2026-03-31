@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Capacidad — Centro de Distribución</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #181c27;
+    --bg3: #1e2335;
+    --card: #1a1f2e;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #e8eaf0;
+    --text2: #8b90a7;
+    --text3: #555a70;
+    --blue: #4f8ef7;
+    --blue-d: #1a3a7a;
+    --blue-l: #a8c4fd;
+    --green: #3ecf8e;
+    --green-d: #0d4a30;
+    --green-l: #9fe8c8;
+    --red: #f05252;
+    --red-d: #4a1010;
+    --red-l: #f9aaaa;
+    --amber: #f59e0b;
+    --amber-d: #4a2e00;
+    --r: 10px;
+    --r2: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* HEADER */
+  .header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .logo { width: 36px; height: 36px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .logo svg { width: 20px; height: 20px; fill: white; }
+  .header-title { font-size: 16px; font-weight: 600; letter-spacing: -0.02em; }
+  .header-sub { font-size: 12px; color: var(--text2); margin-top: 1px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .badge-live { background: rgba(62,207,142,0.15); border: 1px solid rgba(62,207,142,0.3); color: var(--green); font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 500; display: flex; align-items: center; gap: 5px; }
+  .badge-live::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .update-time { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+
+  /* FILTERS */
+  .filters-bar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 12px 32px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .filter-label { font-size: 11px; color: var(--text2); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
+  .filter-group { display: flex; gap: 6px; }
+  .filter-btn { padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .18s; }
+  .filter-btn:hover { border-color: var(--blue); color: var(--blue); }
+  .filter-btn.active { background: var(--blue); border-color: var(--blue); color: white; font-weight: 500; }
+  .filter-btn.active-green { background: var(--green); border-color: var(--green); color: #0a2e1c; font-weight: 500; }
+  .filter-btn.active-red { background: var(--red); border-color: var(--red); color: white; font-weight: 500; }
+  .filter-sep { width: 1px; height: 24px; background: var(--border); }
+
+  /* MAIN LAYOUT */
+  .main { padding: 24px 32px; }
+
+  /* KPI CARDS */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; margin-bottom: 20px; }
+  .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r2); padding: 18px 20px; position: relative; overflow: hidden; transition: border-color .2s; }
+  .kpi-card:hover { border-color: var(--border2); }
+  .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: var(--r2) var(--r2) 0 0; }
+  .kpi-card.c-blue::before { background: var(--blue); }
+  .kpi-card.c-green::before { background: var(--green); }
+  .kpi-card.c-red::before { background: var(--red); }
+  .kpi-card.c-amber::before { background: var(--amber); }
+  .kpi-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; font-size: 16px; }
+  .kpi-card.c-blue .kpi-icon { background: rgba(79,142,247,0.15); }
+  .kpi-card.c-green .kpi-icon { background: rgba(62,207,142,0.15); }
+  .kpi-card.c-red .kpi-icon { background: rgba(240,82,82,0.15); }
+  .kpi-card.c-amber .kpi-icon { background: rgba(245,158,11,0.15); }
+  .kpi-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .kpi-val { font-size: 30px; font-weight: 600; letter-spacing: -0.04em; line-height: 1; margin-bottom: 4px; }
+  .kpi-card.c-blue .kpi-val { color: var(--blue-l); }
+  .kpi-card.c-green .kpi-val { color: var(--green-l); }
+  .kpi-card.c-red .kpi-val { color: var(--red-l); }
+  .kpi-card.c-amber .kpi-val { color: #fde68a; }
+  .kpi-sub { font-size: 11px; color: var(--text3); }
+  .kpi-bar { height: 3px; background: var(--bg3); border-radius: 2px; margin-top: 12px; overflow: hidden; }
+  .kpi-bar-fill { height: 100%; border-radius: 2px; transition: width .6s ease; }
+  .c-blue .kpi-bar-fill { background: var(--blue); }
+  .c-green .kpi-bar-fill { background: var(--green); }
+  .c-red .kpi-bar-fill { background: var(--red); }
+  .c-amber .kpi-bar-fill { background: var(--amber); }
+
+  /* CHART GRID */
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+  .charts-row-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 20px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r2); padding: 20px; }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+  .card-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .chart-wrap { position: relative; }
+
+  /* HEATMAP */
+  .heatmap-section { background: var(--card); border: 1px solid var(--border); border-radius: var(--r2); padding: 20px; margin-bottom: 20px; }
+  .zone-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+  .zone-tab { padding: 6px 16px; border-radius: 20px; border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .18s; }
+  .zone-tab.active { background: rgba(79,142,247,0.2); border-color: var(--blue); color: var(--blue-l); font-weight: 500; }
+  .hm-grid { display: grid; gap: 4px; }
+  .hm-cell { border-radius: 6px; height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all .15s; border: 1px solid transparent; }
+  .hm-cell:hover { transform: scale(1.04); border-color: rgba(255,255,255,0.2); }
+  .hm-pasillo { font-size: 9px; color: rgba(255,255,255,0.5); font-family: 'DM Mono', monospace; margin-bottom: 2px; }
+  .hm-pct { font-size: 14px; font-weight: 600; }
+  .hm-count { font-size: 9px; opacity: 0.7; }
+
+  /* LEGEND */
+  .hm-legend { display: flex; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+  .hm-leg { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text2); }
+  .hm-leg-sq { width: 12px; height: 12px; border-radius: 3px; }
+
+  /* DETAIL TABLE */
+  .detail-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .detail-table th { text-align: left; padding: 8px 12px; color: var(--text2); font-weight: 500; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); }
+  .detail-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+  .detail-table tr:last-child td { border-bottom: none; }
+  .detail-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 500; }
+  .sb-ocu { background: rgba(79,142,247,0.15); color: var(--blue-l); }
+  .sb-vac { background: rgba(62,207,142,0.15); color: var(--green-l); }
+  .sb-fds { background: rgba(240,82,82,0.15); color: var(--red-l); }
+  .pct-cell { display: flex; align-items: center; gap: 8px; }
+  .mini-bar { flex: 1; height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden; max-width: 80px; }
+  .mini-fill { height: 100%; border-radius: 3px; background: var(--blue); }
+  .mono { font-family: 'DM Mono', monospace; font-size: 11px; }
+
+  /* TOOLTIP */
+  #tooltip { position: fixed; background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--r); padding: 10px 14px; font-size: 11px; pointer-events: none; z-index: 999; display: none; min-width: 150px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+  #tooltip .tt-title { font-weight: 600; font-size: 12px; margin-bottom: 6px; color: var(--text); }
+  #tooltip .tt-row { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 3px; color: var(--text2); }
+  #tooltip .tt-row span:last-child { color: var(--text); font-family: 'DM Mono', monospace; }
+
+  /* FOOTER */
+  .footer { padding: 16px 32px; border-top: 1px solid var(--border); text-align: center; font-size: 11px; color: var(--text3); }
+
+  @media (max-width: 1100px) {
+    .kpi-grid { grid-template-columns: repeat(2,1fr); }
+    .charts-row { grid-template-columns: 1fr 1fr; }
+    .charts-row-2 { grid-template-columns: 1fr; }
+    .main { padding: 16px; }
+    .header { padding: 14px 16px; }
+    .filters-bar { padding: 10px 16px; }
+  }
+  @media (max-width: 640px) {
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .charts-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">
+      <svg viewBox="0 0 24 24"><path d="M3 3h7v7H3zm11 0h7v7h-7zM3 14h7v7H3zm11 3h2v-2h2v2h2v2h-2v2h-2v-2h-2z"/></svg>
+    </div>
+    <div>
+      <div class="header-title">Centro de Distribución — Gestión de Capacidad</div>
+      <div class="header-sub">Monitoreo de ubicaciones por zona, pasillo y status</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="badge-live">En línea</div>
+    <div class="update-time" id="clock"></div>
+  </div>
+</div>
+
+<div class="filters-bar">
+  <span class="filter-label">Zona</span>
+  <div class="filter-group" id="zona-filters">
+    <button class="filter-btn active" onclick="setFilter('zona','TODAS',this)">Todas</button>
+    <button class="filter-btn" onclick="setFilter('zona','PRS',this)">PRS — Rack Selectivo</button>
+    <button class="filter-btn" onclick="setFilter('zona','PMZ',this)">PMZ — Mezzanine</button>
+    <button class="filter-btn" onclick="setFilter('zona','PGR',this)">PGR — Rack Grilla</button>
+  </div>
+  <div class="filter-sep"></div>
+  <span class="filter-label">Status</span>
+  <div class="filter-group" id="status-filters">
+    <button class="filter-btn active" onclick="setFilter('status','TODOS',this)">Todos</button>
+    <button class="filter-btn" onclick="setFilter('status','OCUPADA',this)">Ocupadas</button>
+    <button class="filter-btn" onclick="setFilter('status','VACIA',this)">Vacías</button>
+    <button class="filter-btn" onclick="setFilter('status','FUERA DE SISTEMA',this)">Fuera sistema</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi-card c-blue">
+      <div class="kpi-icon">📦</div>
+      <div class="kpi-label">Total Ubicaciones</div>
+      <div class="kpi-val" id="kpi-total">12.572</div>
+      <div class="kpi-sub">3 zonas activas</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" style="width:100%"></div></div>
+    </div>
+    <div class="kpi-card c-blue">
+      <div class="kpi-icon">🔵</div>
+      <div class="kpi-label">Ocupadas</div>
+      <div class="kpi-val" id="kpi-ocu">7.621</div>
+      <div class="kpi-sub" id="kpi-ocu-pct">60.6% del total</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" id="bar-ocu" style="width:60.6%"></div></div>
+    </div>
+    <div class="kpi-card c-green">
+      <div class="kpi-icon">🟢</div>
+      <div class="kpi-label">Vacías disponibles</div>
+      <div class="kpi-val" id="kpi-vac">4.767</div>
+      <div class="kpi-sub" id="kpi-vac-pct">37.9% del total</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" id="bar-vac" style="width:37.9%"></div></div>
+    </div>
+    <div class="kpi-card c-red">
+      <div class="kpi-icon">🔴</div>
+      <div class="kpi-label">Fuera de Sistema</div>
+      <div class="kpi-val" id="kpi-fds">184</div>
+      <div class="kpi-sub" id="kpi-fds-pct">1.5% del total</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" id="bar-fds" style="width:1.5%"></div></div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 1 -->
+  <div class="charts-row">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Distribución Global de Status</div>
+          <div class="card-sub">Proporción sobre el total de ubicaciones</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:200px"><canvas id="chartDonut"></canvas></div>
+      <div id="donut-legend" style="display:flex;gap:16px;margin-top:14px;flex-wrap:wrap"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Capacidad por Zona</div>
+          <div class="card-sub">Ocupación vs disponibilidad</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:220px"><canvas id="chartZona"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Capacidad por Área</div>
+          <div class="card-sub">4 áreas de almacenaje</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:220px"><canvas id="chartArea"></canvas></div>
+    </div>
+  </div>
+
+  <!-- HEATMAP -->
+  <div class="heatmap-section">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Mapa de Calor — Ocupación por Pasillo</div>
+        <div class="card-sub">% de ocupación · Hover para detalle completo</div>
+      </div>
+      <div class="zone-tabs">
+        <button class="zone-tab active" onclick="showHM('PRS',this)">PRS — Rack Selectivo</button>
+        <button class="zone-tab" onclick="showHM('PMZ',this)">PMZ — Mezzanine</button>
+        <button class="zone-tab" onclick="showHM('PGR',this)">PGR — Rack Grilla</button>
+      </div>
+    </div>
+    <div class="hm-legend">
+      <span style="font-size:11px;color:var(--text2);font-weight:500">% Ocupación:</span>
+      <div class="hm-leg"><div class="hm-leg-sq" style="background:#1a3063"></div>&lt;30%</div>
+      <div class="hm-leg"><div class="hm-leg-sq" style="background:#1e4d7a"></div>30–50%</div>
+      <div class="hm-leg"><div class="hm-leg-sq" style="background:#2563a8"></div>50–70%</div>
+      <div class="hm-leg"><div class="hm-leg-sq" style="background:#3b82d4"></div>70–90%</div>
+      <div class="hm-leg"><div class="hm-leg-sq" style="background:#4f8ef7"></div>≥90%</div>
+      <div class="hm-leg"><div class="hm-leg-sq" style="background:#7c1a1a"></div>c/Fuera sistema</div>
+    </div>
+    <div id="heatmap-grid"></div>
+  </div>
+
+  <!-- DETAIL TABLE + NIVEL CHART -->
+  <div class="charts-row-2">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Detalle por Área — Status Completo</div>
+      </div>
+      <table class="detail-table">
+        <thead>
+          <tr>
+            <th>Área</th>
+            <th>Zona</th>
+            <th>Ocupadas</th>
+            <th>Vacías</th>
+            <th>Fuera sistema</th>
+            <th>Total</th>
+            <th>% Ocupación</th>
+          </tr>
+        </thead>
+        <tbody id="detail-tbody"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Rack Selectivo PRS</div>
+          <div class="card-sub">Ocupación por nivel de altura</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:260px"><canvas id="chartNivel"></canvas></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">Dashboard Capacidad CD · Datos fuente: CAPACIDAD_.xlsx · Hoja BD · <span id="total-registros"></span> registros procesados</div>
+
+<div id="tooltip"></div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const RAW = {
+  global: { OCUPADA: 7621, VACIA: 4767, 'FUERA DE SISTEMA': 184 },
+  zonas: [
+    { zona:'PRS', ocu:2379, vac:59,   fds:134 },
+    { zona:'PMZ', ocu:5173, vac:4707, fds:0   },
+    { zona:'PGR', ocu:69,   vac:1,    fds:50  },
+  ],
+  areas: [
+    { area:'Rack Selectivo',       zona:'PRS', ocu:2379, vac:59,   fds:134 },
+    { area:'Mezzanine 1er Piso',   zona:'PMZ', ocu:1711, vac:65,   fds:0   },
+    { area:'Mezzanine 2do Piso',   zona:'PMZ', ocu:3462, vac:4642, fds:0   },
+    { area:'Rack Grilla',          zona:'PGR', ocu:69,   vac:1,    fds:50  },
+  ],
+  niveles_PRS: [
+    { nivel:'N1', ocu:299, fds:0  },
+    { nivel:'N2', ocu:417, fds:0  },
+    { nivel:'N3', ocu:284, fds:12 },
+    { nivel:'N4', ocu:278, fds:10 },
+    { nivel:'N5', ocu:285, fds:10 },
+    { nivel:'N6', ocu:277, fds:17 },
+    { nivel:'N7', ocu:254, fds:38 },
+    { nivel:'N8', ocu:221, fds:33 },
+    { nivel:'N9', ocu:64,  fds:14 },
+  ],
+  hm: {
+    PRS: [
+      {p:'PRS01', ocu:235, fds:119, vac:5},
+      {p:'PRS02', ocu:372, fds:15,  vac:6},
+      {p:'PRS03', ocu:381, fds:0,   vac:13},
+      {p:'PRS04', ocu:383, fds:0,   vac:9},
+      {p:'PRS05', ocu:385, fds:0,   vac:9},
+      {p:'PRS06', ocu:221, fds:0,   vac:7},
+      {p:'PRS07', ocu:70,  fds:0,   vac:1},
+      {p:'PRS08', ocu:86,  fds:0,   vac:2},
+      {p:'PRS09', ocu:88,  fds:0,   vac:0},
+      {p:'PRS10', ocu:81,  fds:0,   vac:1},
+      {p:'PRS11', ocu:77,  fds:0,   vac:6},
+    ],
+    PMZ: [
+      {p:'PMZ01',ocu:66,fds:0,vac:0},{p:'PMZ02',ocu:84,fds:0,vac:0},
+      {p:'PMZ03',ocu:83,fds:0,vac:1},{p:'PMZ04',ocu:83,fds:0,vac:1},
+      {p:'PMZ05',ocu:83,fds:0,vac:1},{p:'PMZ06',ocu:84,fds:0,vac:0},
+      {p:'PMZ07',ocu:83,fds:0,vac:1},{p:'PMZ08',ocu:84,fds:0,vac:0},
+      {p:'PMZ09',ocu:167,fds:0,vac:1},{p:'PMZ10',ocu:161,fds:0,vac:7},
+      {p:'PMZ11',ocu:163,fds:0,vac:5},{p:'PMZ12',ocu:160,fds:0,vac:8},
+      {p:'PMZ13',ocu:194,fds:0,vac:22},{p:'PMZ14',ocu:216,fds:0,vac:18},
+      {p:'PMZ15',ocu:143,fds:0,vac:197},{p:'PMZ16',ocu:191,fds:0,vac:313},
+      {p:'PMZ17',ocu:275,fds:0,vac:341},{p:'PMZ18',ocu:267,fds:0,vac:349},
+      {p:'PMZ19',ocu:286,fds:0,vac:330},{p:'PMZ20',ocu:271,fds:0,vac:345},
+      {p:'PMZ21',ocu:266,fds:0,vac:350},{p:'PMZ22',ocu:255,fds:0,vac:361},
+      {p:'PMZ23',ocu:276,fds:0,vac:340},{p:'PMZ24',ocu:273,fds:0,vac:343},
+      {p:'PMZ25',ocu:260,fds:0,vac:356},{p:'PMZ26',ocu:240,fds:0,vac:376},
+      {p:'PMZ27',ocu:252,fds:0,vac:276},{p:'PMZ28',ocu:207,fds:0,vac:365},
+    ],
+    PGR: [
+      {p:'PGR01',ocu:56,fds:4,vac:0},
+      {p:'PGR02',ocu:13,fds:46,vac:1},
+    ],
+  }
+};
+
+// ─── FILTERS ─────────────────────────────────────────────────────────────────
+let activeZona = 'TODAS', activeStatus = 'TODOS';
+
+function setFilter(type, val, btn) {
+  if (type === 'zona') {
+    activeZona = val;
+    document.querySelectorAll('#zona-filters .filter-btn').forEach(b => b.classList.remove('active'));
+  } else {
+    activeStatus = val;
+    document.querySelectorAll('#status-filters .filter-btn').forEach(b => b.classList.remove('active'));
+  }
+  btn.classList.add('active');
+  updateKPIs();
+  updateCharts();
+}
+
+function getFiltered() {
+  let zones = RAW.zonas;
+  if (activeZona !== 'TODAS') zones = zones.filter(z => z.zona === activeZona);
+  let ocu = zones.reduce((a,z)=>a+z.ocu,0);
+  let vac = zones.reduce((a,z)=>a+z.vac,0);
+  let fds = zones.reduce((a,z)=>a+z.fds,0);
+  if (activeStatus === 'OCUPADA') { vac=0; fds=0; }
+  if (activeStatus === 'VACIA') { ocu=0; fds=0; }
+  if (activeStatus === 'FUERA DE SISTEMA') { ocu=0; vac=0; }
+  return {ocu, vac, fds, total: ocu+vac+fds};
+}
+
+function updateKPIs() {
+  const {ocu,vac,fds,total} = getFiltered();
+  document.getElementById('kpi-total').textContent = total.toLocaleString('es-CL');
+  document.getElementById('kpi-ocu').textContent = ocu.toLocaleString('es-CL');
+  document.getElementById('kpi-vac').textContent = vac.toLocaleString('es-CL');
+  document.getElementById('kpi-fds').textContent = fds.toLocaleString('es-CL');
+  const pOcu = total ? (ocu/total*100).toFixed(1) : 0;
+  const pVac = total ? (vac/total*100).toFixed(1) : 0;
+  const pFds = total ? (fds/total*100).toFixed(1) : 0;
+  document.getElementById('kpi-ocu-pct').textContent = `${pOcu}% del total`;
+  document.getElementById('kpi-vac-pct').textContent = `${pVac}% del total`;
+  document.getElementById('kpi-fds-pct').textContent = `${pFds}% del total`;
+  document.getElementById('bar-ocu').style.width = pOcu + '%';
+  document.getElementById('bar-vac').style.width = pVac + '%';
+  document.getElementById('bar-fds').style.width = pFds + '%';
+}
+
+// ─── CHARTS ──────────────────────────────────────────────────────────────────
+Chart.defaults.color = '#8b90a7';
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+
+let chartDonut, chartZona, chartArea, chartNivel;
+
+function initCharts() {
+  // DONUT
+  chartDonut = new Chart(document.getElementById('chartDonut'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Ocupadas', 'Vacías', 'Fuera de sistema'],
+      datasets: [{ data: [7621, 4767, 184], backgroundColor: ['#4f8ef7','#3ecf8e','#f05252'], borderWidth: 0, hoverOffset: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '72%',
+      plugins: { legend: { display: false }, tooltip: { callbacks: {
+        label: ctx => ` ${ctx.label}: ${ctx.raw.toLocaleString('es-CL')} (${(ctx.raw/12572*100).toFixed(1)}%)`
+      }}}
+    }
+  });
+  // Legend manual
+  const dl = document.getElementById('donut-legend');
+  [['Ocupadas','#4f8ef7',7621],['Vacías','#3ecf8e',4767],['Fuera sist.','#f05252',184]].forEach(([l,c,v]) => {
+    dl.innerHTML += `<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)">
+      <div style="width:10px;height:10px;border-radius:2px;background:${c}"></div>
+      <span>${l}</span><span style="color:var(--text);font-family:'DM Mono',monospace">${v.toLocaleString('es-CL')}</span></div>`;
+  });
+
+  // ZONA — horizontal stacked bar
+  chartZona = new Chart(document.getElementById('chartZona'), {
+    type: 'bar',
+    data: {
+      labels: ['PRS', 'PMZ', 'PGR'],
+      datasets: [
+        { label:'Ocupadas', data:[2379,5173,69], backgroundColor:'#4f8ef7', borderRadius:3 },
+        { label:'Vacías',   data:[59,4707,1],    backgroundColor:'#3ecf8e', borderRadius:3 },
+        { label:'Fuera',    data:[134,0,50],      backgroundColor:'#f05252', borderRadius:3 },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false, indexAxis:'y',
+      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, padding:12, font:{size:11} } } },
+      scales:{
+        x:{ stacked:true, grid:{ color:'rgba(255,255,255,0.04)' }, ticks:{font:{size:10}} },
+        y:{ stacked:true, grid:{ display:false }, ticks:{font:{size:11}} }
+      }
+    }
+  });
+
+  // ÁREA
+  chartArea = new Chart(document.getElementById('chartArea'), {
+    type: 'bar',
+    data: {
+      labels: ['Rack\nSelectivo','Mezz.\n1er Piso','Mezz.\n2do Piso','Rack\nGrilla'],
+      datasets: [
+        { label:'Ocupadas', data:[2379,1711,3462,69], backgroundColor:'#4f8ef7', borderRadius:3 },
+        { label:'Vacías',   data:[59,65,4642,1],      backgroundColor:'#3ecf8e', borderRadius:3 },
+        { label:'Fuera',    data:[134,0,0,50],         backgroundColor:'#f05252', borderRadius:3 },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false, indexAxis:'y',
+      plugins:{ legend:{ display:false } },
+      scales:{
+        x:{ stacked:true, grid:{ color:'rgba(255,255,255,0.04)' }, ticks:{font:{size:10}} },
+        y:{ stacked:true, grid:{ display:false }, ticks:{font:{size:10}} }
+      }
+    }
+  });
+
+  // NIVEL PRS
+  chartNivel = new Chart(document.getElementById('chartNivel'), {
+    type: 'bar',
+    data: {
+      labels: RAW.niveles_PRS.map(n=>n.nivel),
+      datasets: [
+        { label:'Ocupadas', data: RAW.niveles_PRS.map(n=>n.ocu), backgroundColor:'#4f8ef7', borderRadius:4 },
+        { label:'Fuera sist.', data: RAW.niveles_PRS.map(n=>n.fds), backgroundColor:'#f05252', borderRadius:4 },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false, indexAxis:'y',
+      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, padding:10, font:{size:11} } } },
+      scales:{
+        x:{ stacked:true, grid:{ color:'rgba(255,255,255,0.04)' }, ticks:{font:{size:10}} },
+        y:{ stacked:true, grid:{ display:false }, ticks:{font:{size:11}} }
+      }
+    }
+  });
+}
+
+function updateCharts() {
+  const zones = activeZona === 'TODAS' ? RAW.zonas : RAW.zonas.filter(z=>z.zona===activeZona);
+  let ocu = zones.reduce((a,z)=>a+z.ocu,0);
+  let vac = zones.reduce((a,z)=>a+z.vac,0);
+  let fds = zones.reduce((a,z)=>a+z.fds,0);
+  chartDonut.data.datasets[0].data = [
+    activeStatus==='TODOS'||activeStatus==='OCUPADA' ? ocu : 0,
+    activeStatus==='TODOS'||activeStatus==='VACIA' ? vac : 0,
+    activeStatus==='TODOS'||activeStatus==='FUERA DE SISTEMA' ? fds : 0,
+  ];
+  chartDonut.update();
+}
+
+// ─── HEATMAP ─────────────────────────────────────────────────────────────────
+function hmColor(pct, hasFds) {
+  if (hasFds) return { bg:'rgba(120,30,30,0.7)', txt:'#fca5a5' };
+  if (pct >= 90) return { bg:'#1e3a7a', txt:'#93c5fd' };
+  if (pct >= 70) return { bg:'#1a3063', txt:'#7db8f7' };
+  if (pct >= 50) return { bg:'#173060', txt:'#60a5fa' };
+  if (pct >= 30) return { bg:'#132850', txt:'#93c5fd' };
+  return { bg:'#0f1f3d', txt:'#60a5fa' };
+}
+
+function showHM(zone, btn) {
+  document.querySelectorAll('.zone-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHM(zone);
+}
+
+function renderHM(zone) {
+  const data = RAW.hm[zone];
+  const cols = zone === 'PMZ' ? 7 : zone === 'PRS' ? 6 : 2;
+  const grid = document.getElementById('heatmap-grid');
+  grid.innerHTML = '';
+  const g = document.createElement('div');
+  g.className = 'hm-grid';
+  g.style.gridTemplateColumns = `repeat(${cols}, minmax(0,1fr))`;
+  data.forEach(r => {
+    const tot = r.ocu + r.fds + r.vac;
+    const pOcu = tot ? Math.round(r.ocu/tot*100) : 0;
+    const c = hmColor(pOcu, r.fds > 0);
+    const cell = document.createElement('div');
+    cell.className = 'hm-cell';
+    cell.style.background = c.bg;
+    cell.innerHTML = `<div class="hm-pasillo">${r.p}</div><div class="hm-pct" style="color:${c.txt}">${pOcu}%</div><div class="hm-count" style="color:${c.txt}">${r.ocu.toLocaleString('es-CL')}</div>`;
+    cell.addEventListener('mousemove', e => {
+      const pVac = tot ? Math.round(r.vac/tot*100) : 0;
+      const pFds = tot ? Math.round(r.fds/tot*100) : 0;
+      const tip = document.getElementById('tooltip');
+      tip.style.display='block';
+      tip.style.left=(e.clientX+14)+'px';
+      tip.style.top=(e.clientY-10)+'px';
+      tip.innerHTML=`<div class="tt-title">${r.p}</div>
+        <div class="tt-row"><span>Ocupadas</span><span>${r.ocu.toLocaleString('es-CL')} (${pOcu}%)</span></div>
+        <div class="tt-row"><span>Vacías</span><span>${r.vac.toLocaleString('es-CL')} (${pVac}%)</span></div>
+        <div class="tt-row"><span>Fuera sistema</span><span>${r.fds} (${pFds}%)</span></div>
+        <div class="tt-row"><span>Total</span><span>${tot.toLocaleString('es-CL')}</span></div>`;
+    });
+    cell.addEventListener('mouseleave', ()=>{ document.getElementById('tooltip').style.display='none'; });
+    g.appendChild(cell);
+  });
+  grid.appendChild(g);
+}
+
+// ─── DETAIL TABLE ─────────────────────────────────────────────────────────────
+function renderTable() {
+  const tb = document.getElementById('detail-tbody');
+  RAW.areas.forEach(r => {
+    const tot = r.ocu + r.vac + r.fds;
+    const pOcu = tot ? (r.ocu/tot*100).toFixed(1) : 0;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="font-weight:500">${r.area}</td>
+      <td><span class="mono">${r.zona}</span></td>
+      <td><span class="status-badge sb-ocu">${r.ocu.toLocaleString('es-CL')}</span></td>
+      <td><span class="status-badge sb-vac">${r.vac.toLocaleString('es-CL')}</span></td>
+      <td><span class="status-badge sb-fds">${r.fds.toLocaleString('es-CL')}</span></td>
+      <td class="mono">${tot.toLocaleString('es-CL')}</td>
+      <td>
+        <div class="pct-cell">
+          <span class="mono" style="min-width:38px">${pOcu}%</span>
+          <div class="mini-bar"><div class="mini-fill" style="width:${pOcu}%"></div></div>
+        </div>
+      </td>`;
+    tb.appendChild(tr);
+  });
+}
+
+// ─── CLOCK ───────────────────────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleString('es-CL',{dateStyle:'short',timeStyle:'short'});
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+initCharts();
+renderHM('PRS');
+renderTable();
+document.getElementById('total-registros').textContent = '12.572';
+</script>
+</body>
+</html>
