@@ -4,7 +4,85 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Capacidad CD - Penguin Random House</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js">
+let cAv, cAvPie;
+function initAveriados(){
+  if(!R.av){return;}
+  const d=R.av;
+  
+  // Populate centro filter
+  const fil=document.getElementById('av-centro-fil');
+  d.centros.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='av-fb';
+    btn.textContent=c;
+    btn.onclick=function(){avFiltrar(c,this);};
+    fil.appendChild(btn);
+  });
+  
+  // Set badge
+  document.getElementById('av-badge').textContent=fmt(d.total_uni);
+  
+  avRender('TODOS');
+}
+
+function avFiltrar(centro, btn){
+  document.querySelectorAll('.av-fb').forEach(b=>b.classList.remove('act'));
+  btn.classList.add('act');
+  avRender(centro);
+}
+
+function avRender(centro){
+  if(!R.av) return;
+  const d=R.av;
+  
+  const data = centro==='TODOS' ? d.data_all : d.data_centro[centro]||{alm:[],desc:[],total_uni:0,total_mat:0};
+  
+  document.getElementById('av-uni').textContent=fmt(data.total_uni||d.total_uni);
+  document.getElementById('av-mat').textContent=fmt(data.total_mat||d.total_mat);
+  document.getElementById('av-alm').textContent=data.alm?data.alm.length:d.data_all.alm.length;
+  document.getElementById('av-total-lbl').textContent='Centro: '+(centro==='TODOS'?'Todos ('+d.centros.join(', ')+')':centro);
+  
+  const alms=data.alm||d.data_all.alm;
+  const descs=data.desc||d.data_all.desc;
+  const maxUni=alms.length>0?alms[0].u:1;
+  const totalUni=alms.reduce((a,r)=>a+r.u,0);
+  
+  // Tabla almacen
+  let t1='<thead><tr><th>Alm.</th><th>Unidades</th><th>%</th><th>Visual</th></tr></thead><tbody>';
+  alms.forEach(r=>{
+    const pct=(r.u/totalUni*100).toFixed(1);
+    const bar=Math.round(r.u/maxUni*100);
+    t1+=`<tr><td style="font-weight:700">${r.a}</td><td style="text-align:right">${fmt(r.u)}</td><td style="text-align:center">${pct}%</td><td><div class="av-bar-h"><div class="av-bar-f" style="width:${bar}%"></div></div></td></tr>`;
+  });
+  t1+=`<tr class="tot"><td>TOTAL</td><td style="text-align:right">${fmt(totalUni)}</td><td style="text-align:center">100%</td><td></td></tr>`;
+  t1+='</tbody>';
+  document.getElementById('av-tbl-alm').innerHTML=t1;
+  
+  // Tabla descripcion
+  const totalDesc=descs.reduce((a,r)=>a+r.u,0);
+  let t2='<thead><tr><th>Tipo Almacén</th><th>Unidades</th><th>%</th></tr></thead><tbody>';
+  descs.forEach(r=>{
+    const pct=(r.u/totalDesc*100).toFixed(1);
+    t2+=`<tr><td style="font-size:10px">${r.d}</td><td style="text-align:right">${fmt(r.u)}</td><td style="text-align:center">${pct}%</td></tr>`;
+  });
+  t2+=`<tr class="tot"><td>TOTAL</td><td style="text-align:right">${fmt(totalDesc)}</td><td style="text-align:center">100%</td></tr>`;
+  t2+='</tbody>';
+  document.getElementById('av-tbl-desc').innerHTML=t2;
+  
+  // Charts
+  const avColors=['#C0392B','#E74C3C','#EC7063','#F1948A','#F5B7B1'];
+  if(cAv){cAv.destroy();cAv=null;}
+  if(cAvPie){cAvPie.destroy();cAvPie=null;}
+  const c1=document.createElement('canvas');c1.id='cAv';
+  document.getElementById('cAv')?document.getElementById('cAv').parentNode.replaceChild(c1,document.getElementById('cAv')):null;
+  const c2=document.createElement('canvas');c2.id='cAvPie';
+  document.getElementById('cAvPie')?document.getElementById('cAvPie').parentNode.replaceChild(c2,document.getElementById('cAvPie')):null;
+  
+  cAv=new Chart(document.getElementById('cAv'),{type:'bar',data:{labels:alms.map(r=>r.a),datasets:[{label:'Unidades',data:alms.map(r=>r.u),backgroundColor:avColors.slice(0,alms.length),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)+' unidades  ('+( c.raw/totalUni*100).toFixed(1)+'%)'}}},scales:{y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{callback:v=>fmt(v),font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:11}}}}}});
+  cAvPie=new Chart(document.getElementById('cAvPie'),{type:'doughnut',data:{labels:alms.map(r=>r.a),datasets:[{data:alms.map(r=>r.u),backgroundColor:avColors.slice(0,alms.length),borderWidth:2,borderColor:'white',hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'45%',plugins:{legend:{position:'right',labels:{boxWidth:12,padding:10,font:{size:11}}},tooltip:{callbacks:{label:c=>` ${c.label}: ${fmt(c.raw)} (${(c.raw/totalUni*100).toFixed(1)}%)`}}}}});
+}
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
 <style>
 :root{--or:#E8581A;--ord:#c04810;--orl:#f9d4bf;--gy:#4A4A4A;--gyl:#E8E8E8;--gym:#9A9A9A;--wh:#FFFFFF;--bg:#F2F2F2;--tx:#2C2C2C}
@@ -119,6 +197,25 @@ body{font-family:"Barlow",sans-serif;background:var(--bg);color:var(--tx)}
 .no-inc{text-align:center;padding:32px;color:#15803d;font-weight:600;font-size:13px;background:#f0fff4;border-radius:4px}
 @media(max-width:1200px){.kg{grid-template-columns:repeat(3,1fr)}.r3{grid-template-columns:1fr 1fr}.des-kg{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:800px){.kg{grid-template-columns:repeat(2,1fr)}.r3{grid-template-columns:1fr}.r21{grid-template-columns:1fr}.main{padding:12px}.des-r2{grid-template-columns:1fr}}
+
+.av-kg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.av-kc{background:var(--wh);border-radius:4px;border-top:4px solid #C0392B;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.av-kv{font-family:"Barlow Condensed",sans-serif;font-size:30px;font-weight:700;color:#C0392B;line-height:1;margin-bottom:2px}
+.av-kl{font-size:10px;font-weight:700;color:var(--gym);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+.av-ks{font-size:10px;color:var(--gym)}
+.av-r2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.av-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.av-tbl th{text-align:left;padding:8px 10px;color:var(--wh);font-weight:700;font-size:10px;text-transform:uppercase;background:#C0392B}
+.av-tbl td{padding:8px 10px;border-bottom:1px solid var(--gyl);color:var(--tx)}
+.av-tbl tr:nth-child(even) td{background:#fef2f2}
+.av-tbl tr:hover td{background:#fce4e4}
+.av-tbl tr.tot td{background:#C0392B;color:white;font-weight:700}
+.av-bar-h{height:10px;background:var(--gyl);border-radius:2px;overflow:hidden;margin-top:2px}
+.av-bar-f{height:100%;border-radius:2px;background:#C0392B}
+.av-fil{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.av-fb{padding:4px 12px;border-radius:3px;border:1.5px solid #fca5a5;background:transparent;color:#C0392B;font-size:11px;cursor:pointer;font-family:"Barlow",sans-serif;font-weight:600;transition:all .15s}
+.av-fb:hover{background:#fce4e4}
+.av-fb.act{background:#C0392B;border-color:#C0392B;color:white}
 </style>
 </head>
 <body>
@@ -147,6 +244,7 @@ body{font-family:"Barlow",sans-serif;background:var(--bg);color:var(--tx)}
 <div class="tabs">
   <div class="tab act" onclick="showPage('cap',this)">📊 Capacidad</div>
   <div class="tab" onclick="showPage('des',this)">📦 Despachos</div>
+  <div class="tab" onclick="showPage('av',this)">🔴 Averiados <span id="av-badge" style="background:#C0392B;color:white;border-radius:10px;padding:1px 7px;font-size:10px;margin-left:4px"></span></div>
   <div class="tab" onclick="showPage('inc',this)">⚠ Incidencias <span id="inc-badge" style="background:#C0392B;color:white;border-radius:10px;padding:1px 7px;font-size:10px;margin-left:4px"></span></div>
 </div>
 
@@ -237,6 +335,50 @@ body{font-family:"Barlow",sans-serif;background:var(--bg);color:var(--tx)}
 </div>
 
 <!-- INCIDENCIAS -->
+
+<div id="page-av" class="page">
+<div class="main">
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+  <div style="display:flex;align-items:center;gap:8px">
+    <span style="font-size:11px;font-weight:700;color:var(--gym);text-transform:uppercase;letter-spacing:.06em">Filtrar Centro</span>
+    <div class="av-fil" id="av-centro-fil">
+      <button class="av-fb act" onclick="avFiltrar('TODOS',this)">Todos</button>
+    </div>
+  </div>
+  <div style="font-size:11px;color:var(--gym)" id="av-total-lbl"></div>
+</div>
+
+<div class="av-kg">
+  <div class="av-kc"><div class="av-kl">Total Unidades Averiadas</div><div class="av-kv" id="av-uni">—</div><div class="av-ks" id="av-ks1">total acumulado</div></div>
+  <div class="av-kc"><div class="av-kl">Materiales Únicos</div><div class="av-kv" id="av-mat" style="color:#7c3aed">—</div><div class="av-ks">SKUs distintos averiados</div></div>
+  <div class="av-kc"><div class="av-kl">Almacenes</div><div class="av-kv" id="av-alm" style="color:#185FA5">—</div><div class="av-ks">tipos de almacén</div></div>
+</div>
+
+<div class="av-r2">
+  <div class="cd">
+    <div class="ct">Unidades averiadas por almacén</div>
+    <div style="position:relative;height:220px"><canvas id="cAv"></canvas></div>
+  </div>
+  <div class="cd">
+    <div class="ct">Distribución % por almacén</div>
+    <div style="position:relative;height:220px"><canvas id="cAvPie"></canvas></div>
+  </div>
+</div>
+
+<div class="av-r2">
+  <div class="cd">
+    <div class="ct">Detalle por almacén</div>
+    <table class="av-tbl" id="av-tbl-alm"></table>
+  </div>
+  <div class="cd">
+    <div class="ct">Detalle por tipo de almacén</div>
+    <table class="av-tbl" id="av-tbl-desc"></table>
+  </div>
+</div>
+
+</div>
+</div>
 <div id="page-inc" class="page">
 <div class="main">
 <div class="inc-kpi">
@@ -266,7 +408,7 @@ body{font-family:"Barlow",sans-serif;background:var(--bg);color:var(--tx)}
 <div id="tip" onclick="this.style.display='none'" style="cursor:pointer"></div>
 
 <script>
-const R={global:{OCUPADA:0,VACIA:0,FDS:0,UNIDADES:0},zonas:[{z:'PRS',o:0,v:0,f:0,u:0},{z:'PMZ',o:0,v:0,f:0,u:0},{z:'PGR',o:0,v:0,f:0,u:0}],areas:[{a:'Rack Selectivo',z:'PRS',o:0,v:0,f:0,u:0},{a:'Mezz. 1er Piso',z:'PMZ',o:0,v:0,f:0,u:0},{a:'Mezz. 2do Piso',z:'PMZ',o:0,v:0,f:0,u:0},{a:'Rack Grilla',z:'PGR',o:0,v:0,f:0,u:0}],niv:[{n:'N1',o:0,f:0},{n:'N2',o:0,f:0},{n:'N3',o:0,f:0},{n:'N4',o:0,f:0},{n:'N5',o:0,f:0},{n:'N6',o:0,f:0},{n:'N7',o:0,f:0},{n:'N8',o:0,f:0},{n:'N9',o:0,f:0}],hm:{PRS:[],PMZ:[],PGR:[]},incid_bar:4,incid_dup:0,incid_bar_data:[{u:'PGR01-02-03-02',e:'SI'},{u:'PGR01-02-05-02',e:'SI'},{u:'PGR02-01-05-01',e:'SI'},{u:'PGR02-01-05-02',e:'SI'}],incid_dup_data:[],des:{total_uni:843184,total_ped:14115,total_cli:357,prom_dia:10158,meses:['Ene','Feb','Mar'],meses_full:['2026-01','2026-02','2026-03'],mes_uni:[321159,240468,281557],mes_ped:[4225,4104,5786],mes_cli:[256,239,276],clientes:[{n:'LIBRERIA ANTARTICA LTDA',v:138208,p:100},{n:'BUSCALIBRE SA',v:94935,p:69},{n:'NAN',v:64623,p:47},{n:'EDITORIAL CONTRAPUNTO',v:52523,p:38},{n:'LIBRERAA ANTARTICA LTDA',v:40433,p:29},{n:'FERIA CHILENA DEL LIBRO LTDA',v:38068,p:28},{n:'ADM DE VENTAS AL DETALLE LTDA',v:16610,p:12},{n:'LIBRENTA SPA',v:15462,p:11}],titulos:[{n:'GUERRA ENTRE HERMANOS',v:5382},{n:'NOVIO, EL',v:4941},{n:'KPOP DEMON HUNTERS LIBRO OFICIAL DE POST',v:4617},{n:'KPOP DEMON HUNTERS PARA LOS FANS',v:4541},{n:'CABALLERO DE LOS SIETE REINOS',v:4530},{n:'ASISTENTA, LA',v:4202},{n:'TINTA Y SANGRE',v:4125},{n:'OTRAS, LAS',v:3744},{n:'JUEGOS DEL HAMBRE 5: AMANECER EN LA COSE',v:3605},{n:'HARRY POTTER Y EL CALIZ DE FUEGO (HARRY',v:3472}],cal_data:{"2026-01":{"2026-01-05":26570,"2026-01-06":17347,"2026-01-07":11495,"2026-01-08":9655,"2026-01-09":5181,"2026-01-10":8282,"2026-01-12":13619,"2026-01-13":75085,"2026-01-14":11613,"2026-01-15":15715,"2026-01-16":25601,"2026-01-17":7506,"2026-01-19":15230,"2026-01-20":10692,"2026-01-21":19038,"2026-01-22":23795,"2026-01-23":23411,"2026-01-26":297,"2026-01-28":540,"2026-01-29":16,"2026-01-30":471},"2026-02":{"2026-02-04":1246,"2026-02-05":15559,"2026-02-06":13265,"2026-02-09":10401,"2026-02-10":35943,"2026-02-11":12156,"2026-02-12":6155,"2026-02-13":9187,"2026-02-16":8770,"2026-02-17":12037,"2026-02-18":3154,"2026-02-19":11802,"2026-02-20":16105,"2026-02-21":6530,"2026-02-23":20414,"2026-02-24":21515,"2026-02-25":15118,"2026-02-26":14927,"2026-02-27":6184},"2026-03":{"2026-03-02":10110,"2026-03-03":25243,"2026-03-04":20150,"2026-03-05":10941,"2026-03-06":16097,"2026-03-09":7699,"2026-03-10":8075,"2026-03-11":8726,"2026-03-12":10338,"2026-03-13":9959,"2026-03-14":9892,"2026-03-16":4612,"2026-03-17":10058,"2026-03-18":35519,"2026-03-19":9059,"2026-03-20":12718,"2026-03-23":14290,"2026-03-24":12420,"2026-03-25":17911,"2026-03-26":13678,"2026-03-27":3330,"2026-03-28":10732}}}};
+const R={global:{OCUPADA:5542,VACIA:6846,FDS:184,UNIDADES:1404318},zonas:[{z:'PRS',o:2330,v:108,f:134,u:1060110},{z:'PMZ',o:3149,v:6731,f:0,u:307819},{z:'PGR',o:63,v:7,f:50,u:36389}],areas:[{a:'Rack Selectivo',z:'PRS',o:2330,v:108,f:134,u:1060110},{a:'Mezz. 1er Piso',z:'PMZ',o:1720,v:56,f:0,u:246962},{a:'Mezz. 2do Piso',z:'PMZ',o:1429,v:6675,f:0,u:60857},{a:'Rack Grilla',z:'PGR',o:63,v:7,f:50,u:36389}],niv:[{n:'N1',o:301,f:0},{n:'N2',o:417,f:0},{n:'N3',o:279,f:12},{n:'N4',o:270,f:10},{n:'N5',o:276,f:10},{n:'N6',o:273,f:17},{n:'N7',o:243,f:38},{n:'N8',o:210,f:33},{n:'N9',o:61,f:14}],hm:{PRS:[{p:'PRS01',o:229,v:11,f:119,u:96487},{p:'PRS02',o:354,v:24,f:15,u:180878},{p:'PRS03',o:376,v:18,f:0,u:181231},{p:'PRS04',o:373,v:19,f:0,u:163905},{p:'PRS05',o:379,v:15,f:0,u:162948},{p:'PRS06',o:225,v:3,f:0,u:96340},{p:'PRS07',o:69,v:2,f:0,u:33320},{p:'PRS08',o:85,v:3,f:0,u:36955},{p:'PRS09',o:85,v:3,f:0,u:38716},{p:'PRS10',o:78,v:4,f:0,u:35511},{p:'PRS11',o:77,v:6,f:0,u:33819}],PMZ:[{p:'PMZ01',o:65,v:1,f:0,u:23975},{p:'PMZ02',o:84,v:0,f:0,u:16034},{p:'PMZ03',o:84,v:0,f:0,u:13892},{p:'PMZ04',o:83,v:1,f:0,u:15255},{p:'PMZ05',o:83,v:1,f:0,u:14544},{p:'PMZ06',o:84,v:0,f:0,u:13761},{p:'PMZ07',o:84,v:0,f:0,u:15781},{p:'PMZ08',o:84,v:0,f:0,u:19122},{p:'PMZ09',o:167,v:1,f:0,u:18152},{p:'PMZ10',o:164,v:4,f:0,u:18387},{p:'PMZ11',o:163,v:5,f:0,u:18563},{p:'PMZ12',o:158,v:10,f:0,u:16961},{p:'PMZ13',o:202,v:14,f:0,u:17252},{p:'PMZ14',o:215,v:19,f:0,u:25283},{p:'PMZ15',o:141,v:199,f:0,u:16060},{p:'PMZ16',o:191,v:313,f:0,u:8134},{p:'PMZ17',o:274,v:342,f:0,u:7811},{p:'PMZ18',o:266,v:350,f:0,u:7805},{p:'PMZ19',o:285,v:331,f:0,u:11569},{p:'PMZ20',o:270,v:346,f:0,u:9467},{p:'PMZ21',o:2,v:614,f:0,u:11},{p:'PMZ22',o:0,v:616,f:0,u:0},{p:'PMZ23',o:0,v:616,f:0,u:0},{p:'PMZ24',o:0,v:616,f:0,u:0},{p:'PMZ25',o:0,v:616,f:0,u:0},{p:'PMZ26',o:0,v:616,f:0,u:0},{p:'PMZ27',o:0,v:528,f:0,u:0},{p:'PMZ28',o:0,v:572,f:0,u:0}],PGR:[{p:'PGR01',o:50,v:6,f:4,u:27835},{p:'PGR02',o:13,v:1,f:46,u:8554}]},incid_bar:90,incid_dup:0,incid_bar_data:[{u:'PRS01-01-05-02',e:'PALLET MAL UBICADO'},{u:'PRS01-01-07-01',e:'PALLET MAL UBICADO'},{u:'PRS01-01-08-01',e:'PALLET MAL UBICADO'},{u:'PRS01-01-08-02',e:'PALLET MAL UBICADO'},{u:'PRS02-03-08-01',e:'PALLET MAL UBICADO'},{u:'PRS02-05-07-01',e:'PALLET MAL UBICADO'},{u:'PRS02-06-08-02',e:'PALLET MAL UBICADO'},{u:'PGR01-01-05-02',e:'PALLET MAL UBICADO'},{u:'PGR01-02-05-02',e:'PALLET MAL UBICADO'},{u:'PGR01-03-02-02',e:'PALLET MAL UBICADO'},{u:'PGR01-04-05-01',e:'PALLET MAL UBICADO'},{u:'PGR01-05-06-02',e:'PALLET MAL UBICADO'},{u:'PRS01-12-04-02',e:'PALLET MAL UBICADO'},{u:'PRS01-13-05-01',e:'PALLET MAL UBICADO'},{u:'PRS01-16-04-02',e:'PALLET MAL UBICADO'},{u:'PRS01-18-03-01',e:'PALLET MAL UBICADO'},{u:'PRS01-18-04-01',e:'PALLET MAL UBICADO'},{u:'PRS01-18-05-02',e:'PALLET MAL UBICADO'},{u:'PRS02-01-08-02',e:'PALLET MAL UBICADO'},{u:'PRS02-02-05-01',e:'PALLET MAL UBICADO'},{u:'PRS02-02-09-01',e:'PALLET MAL UBICADO'},{u:'PRS02-05-05-01',e:'PALLET MAL UBICADO'},{u:'PRS02-06-04-02',e:'PALLET MAL UBICADO'},{u:'PRS02-07-07-01',e:'PALLET MAL UBICADO'},{u:'PRS02-07-08-01',e:'PALLET MAL UBICADO'},{u:'PRS02-08-05-01',e:'PALLET MAL UBICADO'},{u:'PRS02-09-04-01',e:'PALLET MAL UBICADO'},{u:'PRS02-13-05-01',e:'PALLET MAL UBICADO'},{u:'PRS02-17-07-02',e:'PALLET MAL UBICADO'},{u:'PRS02-20-06-01',e:'PALLET MAL UBICADO'},{u:'PRS02-20-07-02',e:'PALLET MAL UBICADO'},{u:'PRS02-20-08-01',e:'PALLET MAL UBICADO'},{u:'PRS02-22-06-01',e:'PALLET MAL UBICADO'},{u:'PRS02-22-07-01',e:'PALLET MAL UBICADO'},{u:'PRS02-22-08-02',e:'PALLET MAL UBICADO'},{u:'PRS03-01-07-01',e:'PALLET MAL UBICADO'},{u:'PRS03-02-06-01',e:'PALLET MAL UBICADO'},{u:'PRS03-02-06-02',e:'PALLET MAL UBICADO'},{u:'PRS03-02-09-01',e:'PALLET MAL UBICADO'},{u:'PRS03-03-04-01',e:'PALLET MAL UBICADO'},{u:'PRS03-03-09-02',e:'PALLET MAL UBICADO'},{u:'PRS03-04-03-01',e:'PALLET MAL UBICADO'},{u:'PRS03-04-04-01',e:'PALLET MAL UBICADO'},{u:'PRS03-04-04-02',e:'PALLET MAL UBICADO'},{u:'PRS03-04-06-01',e:'PALLET MAL UBICADO'},{u:'PRS03-04-07-01',e:'PALLET MAL UBICADO'},{u:'PRS03-08-04-01',e:'PALLET MAL UBICADO'},{u:'PRS03-08-07-01',e:'PALLET MAL UBICADO'},{u:'PRS03-20-08-01',e:'PALLET MAL UBICADO'},{u:'PRS04-02-04-02',e:'PALLET MAL UBICADO'},{u:'PRS04-02-06-02',e:'PALLET MAL UBICADO'},{u:'PRS04-02-08-02',e:'PALLET MAL UBICADO'},{u:'PRS04-03-03-01',e:'PALLET MAL UBICADO'},{u:'PRS04-04-03-02',e:'PALLET MAL UBICADO'},{u:'PRS04-05-03-01',e:'PALLET MAL UBICADO'},{u:'PRS04-05-08-01',e:'PALLET MAL UBICADO'},{u:'PRS04-06-05-01',e:'PALLET MAL UBICADO'},{u:'PRS04-07-08-01',e:'PALLET MAL UBICADO'},{u:'PRS04-09-08-01',e:'PALLET MAL UBICADO'},{u:'PRS04-12-06-02',e:'PALLET MAL UBICADO'},{u:'PRS04-17-08-02',e:'PALLET MAL UBICADO'},{u:'PRS04-19-07-02',e:'PALLET MAL UBICADO'},{u:'PRS04-20-07-02',e:'PALLET MAL UBICADO'},{u:'PRS05-03-08-02',e:'PALLET MAL UBICADO'},{u:'PRS05-04-03-01',e:'PALLET MAL UBICADO'},{u:'PRS05-04-07-01',e:'PALLET MAL UBICADO'},{u:'PRS05-05-08-01',e:'PALLET MAL UBICADO'},{u:'PRS05-06-07-02',e:'PALLET MAL UBICADO'},{u:'PRS05-08-06-01',e:'PALLET MAL UBICADO'},{u:'PRS05-09-07-01',e:'PALLET MAL UBICADO'},{u:'PRS05-18-08-02',e:'PALLET MAL UBICADO'},{u:'PRS05-19-02-01',e:'PALLET MAL UBICADO'},{u:'PRS05-19-03-01',e:'PALLET MAL UBICADO'},{u:'PRS05-19-05-01',e:'PALLET MAL UBICADO'},{u:'PRS05-20-05-02',e:'PALLET MAL UBICADO'},{u:'PRS06-03-02-01',e:'PALLET MAL UBICADO'},{u:'PRS06-13-04-01',e:'PALLET MAL UBICADO'},{u:'PRS06-15-04-01',e:'PALLET MAL UBICADO'},{u:'PRS07-01-03-02',e:'PALLET MAL UBICADO'},{u:'PRS08-02-03-01',e:'PALLET MAL UBICADO'},{u:'PRS08-04-04-02',e:'PALLET MAL UBICADO'},{u:'PRS08-04-05-01',e:'PALLET MAL UBICADO'},{u:'PRS09-02-05-01',e:'PALLET MAL UBICADO'},{u:'PRS09-03-06-02',e:'PALLET MAL UBICADO'},{u:'PRS09-06-05-01',e:'PALLET MAL UBICADO'},{u:'PRS10-01-04-01',e:'PALLET MAL UBICADO'},{u:'PRS10-01-04-02',e:'PALLET MAL UBICADO'},{u:'PRS10-01-06-01',e:'PALLET MAL UBICADO'},{u:'PRS10-04-03-02',e:'PALLET MAL UBICADO'},{u:'PGR01-02-03-01',e:'PALLET MAL UBICADO'}],incid_dup_data:[],des:{total_uni:843184,total_ped:14115,total_cli:357,prom_dia:10158,meses:['Ene','Feb','Mar'],meses_full:['2026-01','2026-02','2026-03'],mes_uni:[321159,240468,281557],mes_ped:[4225,4104,5786],mes_cli:[256,239,276],clientes:[{n:'LIBRERIA ANTARTICA LTDA',v:138208,p:100},{n:'BUSCALIBRE SA',v:94935,p:69},{n:'NAN',v:64623,p:47},{n:'EDITORIAL CONTRAPUNTO',v:52523,p:38},{n:'LIBRERAA ANTARTICA LTDA',v:40433,p:29},{n:'FERIA CHILENA DEL LIBRO LTDA',v:38068,p:28},{n:'ADM DE VENTAS AL DETALLE LTDA',v:16610,p:12},{n:'LIBRENTA SPA',v:15462,p:11}],titulos:[{n:'GUERRA ENTRE HERMANOS',v:5382},{n:'NOVIO, EL',v:4941},{n:'KPOP DEMON HUNTERS LIBRO OFICIAL DE POST',v:4617},{n:'KPOP DEMON HUNTERS PARA LOS FANS',v:4541},{n:'CABALLERO DE LOS SIETE REINOS',v:4530},{n:'ASISTENTA, LA',v:4202},{n:'TINTA Y SANGRE',v:4125},{n:'OTRAS, LAS',v:3744},{n:'JUEGOS DEL HAMBRE 5: AMANECER EN LA COSE',v:3605},{n:'HARRY POTTER Y EL CALIZ DE FUEGO (HARRY',v:3472}],cal_data:{"2026-01":{"2026-01-05":26570,"2026-01-06":17347,"2026-01-07":11495,"2026-01-08":9655,"2026-01-09":5181,"2026-01-10":8282,"2026-01-12":13619,"2026-01-13":75085,"2026-01-14":11613,"2026-01-15":15715,"2026-01-16":25601,"2026-01-17":7506,"2026-01-19":15230,"2026-01-20":10692,"2026-01-21":19038,"2026-01-22":23795,"2026-01-23":23411,"2026-01-26":297,"2026-01-28":540,"2026-01-29":16,"2026-01-30":471},"2026-02":{"2026-02-04":1246,"2026-02-05":15559,"2026-02-06":13265,"2026-02-09":10401,"2026-02-10":35943,"2026-02-11":12156,"2026-02-12":6155,"2026-02-13":9187,"2026-02-16":8770,"2026-02-17":12037,"2026-02-18":3154,"2026-02-19":11802,"2026-02-20":16105,"2026-02-21":6530,"2026-02-23":20414,"2026-02-24":21515,"2026-02-25":15118,"2026-02-26":14927,"2026-02-27":6184},"2026-03":{"2026-03-02":10110,"2026-03-03":25243,"2026-03-04":20150,"2026-03-05":10941,"2026-03-06":16097,"2026-03-09":7699,"2026-03-10":8075,"2026-03-11":8726,"2026-03-12":10338,"2026-03-13":9959,"2026-03-14":9892,"2026-03-16":4612,"2026-03-17":10058,"2026-03-18":35519,"2026-03-19":9059,"2026-03-20":12718,"2026-03-23":14290,"2026-03-24":12420,"2026-03-25":17911,"2026-03-26":13678,"2026-03-27":3330,"2026-03-28":10732}}},av:{total_uni:105865,total_mat:9030,centros:['3000','3900'],data_all:{alm:[{a:'3047',u:55922,m:6054},{a:'3090',u:24015,m:4726},{a:'3961',u:13720,m:1209},{a:'3962',u:6184,m:555},{a:'3990',u:6024,m:629}],desc:[{d:'AVERIADOS DEVOLUCIONES',u:55922},{d:'AVERIADOS PRH BLUEYONDER',u:24015},{d:'AVERIADOS INGRESO PULMON MKS',u:13720},{d:'SUCIOS INGRESO PULMON MKS',u:6184},{d:'AVERIADOS MKS BLUEYONDER',u:6024}],total_uni:105865,total_mat:9030},data_centro:{'3000':{alm:[{a:'3047',u:55922,m:6054},{a:'3090',u:24015,m:4726}],desc:[{d:'AVERIADOS DEVOLUCIONES',u:55922},{d:'AVERIADOS PRH BLUEYONDER',u:24015}],total_uni:79937,total_mat:7658},'3900':{alm:[{a:'3961',u:13720,m:1209},{a:'3962',u:6184,m:555},{a:'3990',u:6024,m:629}],desc:[{d:'AVERIADOS INGRESO PULMON MKS',u:13720},{d:'SUCIOS INGRESO PULMON MKS',u:6184},{d:'AVERIADOS MKS BLUEYONDER',u:6024}],total_uni:25928,total_mat:1613}}}};
 Chart.defaults.font.family="'Barlow',sans-serif";Chart.defaults.color='#9A9A9A';
 const OR='#E8581A',AM='#F59E42',LG='#C8C8C8',PU='#7c3aed',BL='#185FA5';
 let aZ='TODAS',aS='TODOS';
@@ -461,7 +603,85 @@ function loadIncidencias(){
 
 function updClk(){document.getElementById('clk').textContent=new Date().toLocaleString('es-CL',{dateStyle:'short',timeStyle:'short'});}
 setInterval(updClk,1000);updClk();
-initCh();rhm('PRS');rtbl();upd();loadIncidencias();initDespachos();
+initCh();rhm('PRS');rtbl();upd();loadIncidencias();initDespachos();initAveriados();
+
+let cAv, cAvPie;
+function initAveriados(){
+  if(!R.av){return;}
+  const d=R.av;
+  
+  // Populate centro filter
+  const fil=document.getElementById('av-centro-fil');
+  d.centros.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='av-fb';
+    btn.textContent=c;
+    btn.onclick=function(){avFiltrar(c,this);};
+    fil.appendChild(btn);
+  });
+  
+  // Set badge
+  document.getElementById('av-badge').textContent=fmt(d.total_uni);
+  
+  avRender('TODOS');
+}
+
+function avFiltrar(centro, btn){
+  document.querySelectorAll('.av-fb').forEach(b=>b.classList.remove('act'));
+  btn.classList.add('act');
+  avRender(centro);
+}
+
+function avRender(centro){
+  if(!R.av) return;
+  const d=R.av;
+  
+  const data = centro==='TODOS' ? d.data_all : d.data_centro[centro]||{alm:[],desc:[],total_uni:0,total_mat:0};
+  
+  document.getElementById('av-uni').textContent=fmt(data.total_uni||d.total_uni);
+  document.getElementById('av-mat').textContent=fmt(data.total_mat||d.total_mat);
+  document.getElementById('av-alm').textContent=data.alm?data.alm.length:d.data_all.alm.length;
+  document.getElementById('av-total-lbl').textContent='Centro: '+(centro==='TODOS'?'Todos ('+d.centros.join(', ')+')':centro);
+  
+  const alms=data.alm||d.data_all.alm;
+  const descs=data.desc||d.data_all.desc;
+  const maxUni=alms.length>0?alms[0].u:1;
+  const totalUni=alms.reduce((a,r)=>a+r.u,0);
+  
+  // Tabla almacen
+  let t1='<thead><tr><th>Alm.</th><th>Unidades</th><th>%</th><th>Visual</th></tr></thead><tbody>';
+  alms.forEach(r=>{
+    const pct=(r.u/totalUni*100).toFixed(1);
+    const bar=Math.round(r.u/maxUni*100);
+    t1+=`<tr><td style="font-weight:700">${r.a}</td><td style="text-align:right">${fmt(r.u)}</td><td style="text-align:center">${pct}%</td><td><div class="av-bar-h"><div class="av-bar-f" style="width:${bar}%"></div></div></td></tr>`;
+  });
+  t1+=`<tr class="tot"><td>TOTAL</td><td style="text-align:right">${fmt(totalUni)}</td><td style="text-align:center">100%</td><td></td></tr>`;
+  t1+='</tbody>';
+  document.getElementById('av-tbl-alm').innerHTML=t1;
+  
+  // Tabla descripcion
+  const totalDesc=descs.reduce((a,r)=>a+r.u,0);
+  let t2='<thead><tr><th>Tipo Almacén</th><th>Unidades</th><th>%</th></tr></thead><tbody>';
+  descs.forEach(r=>{
+    const pct=(r.u/totalDesc*100).toFixed(1);
+    t2+=`<tr><td style="font-size:10px">${r.d}</td><td style="text-align:right">${fmt(r.u)}</td><td style="text-align:center">${pct}%</td></tr>`;
+  });
+  t2+=`<tr class="tot"><td>TOTAL</td><td style="text-align:right">${fmt(totalDesc)}</td><td style="text-align:center">100%</td></tr>`;
+  t2+='</tbody>';
+  document.getElementById('av-tbl-desc').innerHTML=t2;
+  
+  // Charts
+  const avColors=['#C0392B','#E74C3C','#EC7063','#F1948A','#F5B7B1'];
+  if(cAv){cAv.destroy();cAv=null;}
+  if(cAvPie){cAvPie.destroy();cAvPie=null;}
+  const c1=document.createElement('canvas');c1.id='cAv';
+  document.getElementById('cAv')?document.getElementById('cAv').parentNode.replaceChild(c1,document.getElementById('cAv')):null;
+  const c2=document.createElement('canvas');c2.id='cAvPie';
+  document.getElementById('cAvPie')?document.getElementById('cAvPie').parentNode.replaceChild(c2,document.getElementById('cAvPie')):null;
+  
+  cAv=new Chart(document.getElementById('cAv'),{type:'bar',data:{labels:alms.map(r=>r.a),datasets:[{label:'Unidades',data:alms.map(r=>r.u),backgroundColor:avColors.slice(0,alms.length),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)+' unidades  ('+( c.raw/totalUni*100).toFixed(1)+'%)'}}},scales:{y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{callback:v=>fmt(v),font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:11}}}}}});
+  cAvPie=new Chart(document.getElementById('cAvPie'),{type:'doughnut',data:{labels:alms.map(r=>r.a),datasets:[{data:alms.map(r=>r.u),backgroundColor:avColors.slice(0,alms.length),borderWidth:2,borderColor:'white',hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'45%',plugins:{legend:{position:'right',labels:{boxWidth:12,padding:10,font:{size:11}}},tooltip:{callbacks:{label:c=>` ${c.label}: ${fmt(c.raw)} (${(c.raw/totalUni*100).toFixed(1)}%)`}}}}});
+}
 </script>
 </body>
 </html>
