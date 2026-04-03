@@ -4,29 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Capacidad CD - Penguin Random House</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js">
-// Despachos charts
-let cDes, cTipo;
-function initDespachos(){
-  if(!R.des){document.getElementById('d-uni').textContent='Sin datos';return;}
-  const d=R.des;
-  document.getElementById('d-uni').textContent=fmt(d.total_uni);
-  document.getElementById('d-ped').textContent=fmt(d.total_ped);
-  document.getElementById('d-cli').textContent=fmt(d.total_cli);
-  document.getElementById('d-prom').textContent=fmt(d.prom_dia);
-  document.getElementById('d-rng').textContent=d.meses[0]+' - '+d.meses[d.meses.length-1]+' 2026';
-  const colors=['#185FA5','#2276C7','#1A6BB8','#1060A0','#0D5090','#0A4080','#073070','#052060','#4A90D9','#6AA8E8','#85BEF0','#A0D0FF'];
-  cDes=new Chart(document.getElementById('cDes'),{type:'bar',data:{labels:d.meses,datasets:[{label:'Unidades',data:d.mes_uni,backgroundColor:colors.slice(0,d.meses.length),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)+' unidades'}}},scales:{y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{callback:v=>fmt(v),font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:11}}}}}});
-  let ct='<table class="des-tbl"><thead><tr><th>#</th><th>Cliente</th><th>Unidades</th><th>%</th></tr></thead><tbody>';
-  d.clientes.forEach((c,i)=>{ct+=`<tr><td>${i+1}</td><td>${c.n}</td><td>${fmt(c.v)}</td><td><div class="des-bar-h"><div class="des-bar-f" style="width:${c.p}%"></div></div></td></tr>`;});
-  ct+='</tbody></table>';document.getElementById('d-cli-tbl').innerHTML=ct;
-  let tt='<table class="des-tbl"><thead><tr><th>#</th><th>Titulo</th><th>Unidades</th></tr></thead><tbody>';
-  d.titulos.forEach((t,i)=>{tt+=`<tr><td>${i+1}</td><td>${t.n}</td><td>${fmt(t.v)}</td></tr>`;});
-  tt+='</tbody></table>';document.getElementById('d-tit-tbl').innerHTML=tt;
-  const tc=['#185FA5','#2276C7','#E8581A','#888888','#F59E42','#4A4A4A','#7c3aed'];
-  cTipo=new Chart(document.getElementById('cTipo'),{type:'bar',data:{labels:d.tipos_lbl,datasets:[{label:'Unidades',data:d.tipos_val,backgroundColor:tc.slice(0,d.tipos_lbl.length),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)+' unidades'}}},scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{callback:v=>fmt(v),font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
-}
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
 <style>
 :root{--or:#E8581A;--ord:#c04810;--orl:#f9d4bf;--gy:#4A4A4A;--gyl:#E8E8E8;--gym:#9A9A9A;--wh:#FFFFFF;--bg:#F2F2F2;--tx:#2C2C2C}
@@ -53,25 +31,6 @@ body{font-family:"Barlow",sans-serif;background:var(--bg);color:var(--tx)}
 .tab:hover{color:var(--or)}
 .tab.act{color:var(--or);border-bottom-color:var(--or)}
 .page{display:none}.page.act{display:block}
-.inc-kpi{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-.inc-kc{background:var(--wh);border-radius:4px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:4px solid #C0392B;display:flex;align-items:center;gap:16px}
-.inc-kc.db{border-left-color:var(--or)}
-.inc-ico{font-size:32px}
-.inc-val{font-family:"Barlow Condensed",sans-serif;font-size:36px;font-weight:700;color:#C0392B;line-height:1}
-.inc-kc.db .inc-val{color:var(--or)}
-.inc-lbl{font-size:10px;font-weight:700;color:var(--gym);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px}
-.inc-sub{font-size:11px;color:var(--gym)}
-.inc-tbl{width:100%;border-collapse:collapse;font-size:11px}
-.inc-tbl th{text-align:left;padding:8px 10px;color:var(--wh);font-weight:700;font-size:10px;text-transform:uppercase;background:#C0392B}
-.inc-tbl.db th{background:var(--or)}
-.inc-tbl td{padding:8px 10px;border-bottom:1px solid var(--gyl);color:var(--tx)}
-.inc-tbl tr:nth-child(even) td{background:#fef2f2}
-.inc-tbl.db tr:nth-child(even) td{background:#fff8f5}
-.inc-tbl tr:hover td{background:#fce4e4}
-.inc-tbl.db tr:hover td{background:#fff0e8}
-.inc-badge{display:inline-block;background:#fce4e4;color:#C0392B;padding:2px 8px;border-radius:2px;font-size:10px;font-weight:700}
-.inc-badge.db{background:var(--orl);color:var(--ord)}
-.no-inc{text-align:center;padding:32px;color:#15803d;font-weight:600;font-size:13px;background:#f0fff4;border-radius:4px}
 .main{padding:18px 26px}
 .kg{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:16px}
 .kc{background:var(--wh);border-radius:4px;border-top:4px solid var(--or);padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
@@ -128,9 +87,6 @@ body{font-family:"Barlow",sans-serif;background:var(--bg);color:var(--tx)}
 .ftr{background:var(--wh);border-top:3px solid var(--or);padding:10px 26px;display:flex;align-items:center;justify-content:space-between}
 .ftr img{height:26px}
 .ftr-t{font-size:10px;color:var(--gym)}
-@media(max-width:1200px){.kg{grid-template-columns:repeat(3,1fr)}.r3{grid-template-columns:1fr 1fr}}
-@media(max-width:800px){.kg{grid-template-columns:repeat(2,1fr)}.r3{grid-template-columns:1fr}.r21{grid-template-columns:1fr}.main{padding:12px}}
-
 .des-kg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
 .des-kc{background:var(--wh);border-radius:4px;border-top:4px solid #185FA5;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
 .des-kv{font-family:"Barlow Condensed",sans-serif;font-size:30px;font-weight:700;color:#185FA5;line-height:1;margin-bottom:2px}
@@ -144,6 +100,25 @@ body{font-family:"Barlow",sans-serif;background:var(--bg);color:var(--tx)}
 .des-tbl tr:hover td{background:#dbeafe}
 .des-bar-h{height:10px;background:var(--gyl);border-radius:2px;overflow:hidden;margin-top:2px}
 .des-bar-f{height:100%;border-radius:2px;background:#185FA5}
+.inc-kpi{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.inc-kc{background:var(--wh);border-radius:4px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:4px solid #C0392B;display:flex;align-items:center;gap:16px}
+.inc-kc.db{border-left-color:var(--or)}
+.inc-ico{font-size:32px}
+.inc-val{font-family:"Barlow Condensed",sans-serif;font-size:36px;font-weight:700;color:#C0392B;line-height:1}
+.inc-kc.db .inc-val{color:var(--or)}
+.inc-lbl{font-size:10px;font-weight:700;color:var(--gym);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px}
+.inc-sub{font-size:11px;color:var(--gym)}
+.inc-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.inc-tbl th{text-align:left;padding:8px 10px;color:var(--wh);font-weight:700;font-size:10px;text-transform:uppercase;background:#C0392B}
+.inc-tbl.db th{background:var(--or)}
+.inc-tbl td{padding:8px 10px;border-bottom:1px solid var(--gyl);color:var(--tx)}
+.inc-tbl tr:nth-child(even) td{background:#fef2f2}
+.inc-tbl.db tr:nth-child(even) td{background:#fff8f5}
+.inc-badge{display:inline-block;background:#fce4e4;color:#C0392B;padding:2px 8px;border-radius:2px;font-size:10px;font-weight:700}
+.inc-badge.db{background:var(--orl);color:var(--ord)}
+.no-inc{text-align:center;padding:32px;color:#15803d;font-weight:600;font-size:13px;background:#f0fff4;border-radius:4px}
+@media(max-width:1200px){.kg{grid-template-columns:repeat(3,1fr)}.r3{grid-template-columns:1fr 1fr}.des-kg{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:800px){.kg{grid-template-columns:repeat(2,1fr)}.r3{grid-template-columns:1fr}.r21{grid-template-columns:1fr}.main{padding:12px}.des-r2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -174,6 +149,8 @@ body{font-family:"Barlow",sans-serif;background:var(--bg);color:var(--tx)}
   <div class="tab" onclick="showPage('des',this)">📦 Despachos</div>
   <div class="tab" onclick="showPage('inc',this)">⚠ Incidencias <span id="inc-badge" style="background:#C0392B;color:white;border-radius:10px;padding:1px 7px;font-size:10px;margin-left:4px"></span></div>
 </div>
+
+<!-- CAPACIDAD -->
 <div id="page-cap" class="page act">
 <div class="main">
 <div class="kg">
@@ -217,35 +194,40 @@ body{font-family:"Barlow",sans-serif;background:var(--bg);color:var(--tx)}
 </div>
 </div>
 
+<!-- DESPACHOS -->
 <div id="page-des" class="page">
 <div class="main">
-
 <div class="des-kg">
   <div class="des-kc"><div class="des-kl">Unidades Despachadas</div><div class="des-kv" id="d-uni">—</div><div class="des-ks" id="d-rng">cargando...</div></div>
-  <div class="des-kc"><div class="des-kl">Pedidos</div><div class="des-kv" id="d-ped">—</div><div class="des-ks">órdenes únicas</div></div>
+  <div class="des-kc"><div class="des-kl">Pedidos</div><div class="des-kv" id="d-ped">—</div><div class="des-ks">ordenes unicas</div></div>
   <div class="des-kc"><div class="des-kl">Clientes Atendidos</div><div class="des-kv" id="d-cli">—</div><div class="des-ks">puntos de entrega</div></div>
-  <div class="des-kc"><div class="des-kl">Promedio Diario</div><div class="des-kv" id="d-prom">—</div><div class="des-ks">unidades por día</div></div>
+  <div class="des-kc"><div class="des-kl">Promedio Diario</div><div class="des-kv" id="d-prom">—</div><div class="des-ks">unidades por dia</div></div>
 </div>
-
 <div class="stl">Despachos por mes</div>
 <div class="cd" style="margin-bottom:16px">
   <div class="ct">Unidades despachadas mensual</div>
   <div style="position:relative;height:160px"><canvas id="cDes"></canvas></div>
 </div>
-
 <div class="des-r2">
-  <div class="cd"><div class="ct">Top clientes — Unidades</div><div id="d-cli-tbl"></div></div>
-  <div class="cd"><div class="ct">Top 10 títulos más despachados</div><div id="d-tit-tbl"></div></div>
+  <div class="cd"><div class="ct">Top clientes — Unidades</div><div id="d-cli-tbl"><div style="text-align:center;padding:20px;color:#888">Cargando...</div></div></div>
+  <div class="cd"><div class="ct">Top 10 titulos mas despachados</div><div id="d-tit-tbl"><div style="text-align:center;padding:20px;color:#888">Cargando...</div></div></div>
 </div>
-
-<div class="stl">Por tipo de pedido</div>
+<div class="stl">Calendario de despachos diarios</div>
 <div class="cd">
-  <div class="ct">Distribución de unidades por tipo</div>
-  <div style="position:relative;height:200px"><canvas id="cTipo"></canvas></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div class="ct" style="margin-bottom:0">Unidades despachadas por dia — haz clic en un dia para ver el detalle</div>
+    <select id="d-cal-mes" onchange="buildCalendar()" style="border:1.5px solid var(--gyl);border-radius:4px;padding:5px 12px;font-size:11px;font-family:Arial;color:var(--gy);cursor:pointer;background:white">
+      <option value="2026-01">Enero 2026</option>
+      <option value="2026-02">Febrero 2026</option>
+      <option value="2026-03" selected>Marzo 2026</option>
+    </select>
+  </div>
+  <div id="d-cal"></div>
+</div>
+</div>
 </div>
 
-</div>
-</div>
+<!-- INCIDENCIAS -->
 <div id="page-inc" class="page">
 <div class="main">
 <div class="inc-kpi">
@@ -255,7 +237,7 @@ body{font-family:"Barlow",sans-serif;background:var(--bg);color:var(--tx)}
   </div>
   <div class="inc-kc db">
     <div class="inc-ico">🔍</div>
-    <div><div class="inc-lbl">Incidencias D.B — PMZ Piso 1</div><div class="inc-val db" id="idb-cnt">0</div><div class="inc-sub">Códigos en más de 1 ubicación</div></div>
+    <div><div class="inc-lbl">Incidencias D.B — PMZ Piso 1</div><div class="inc-val db" id="idb-cnt">0</div><div class="inc-sub">Codigos en mas de 1 ubicacion</div></div>
   </div>
 </div>
 <div class="stl">Incidencias Barrido — Pallets mal ubicados</div>
@@ -263,24 +245,30 @@ body{font-family:"Barlow",sans-serif;background:var(--bg);color:var(--tx)}
   <div class="ct">Barrido=1 · BY=0 · Sin fuera de sistema</div>
   <div id="inc-bar-body"></div>
 </div>
-<div class="stl">Incidencias D.B — Códigos en más de 1 ubicación (PMZ Piso 1)</div>
+<div class="stl">Incidencias D.B — Codigos en mas de 1 ubicacion (PMZ Piso 1)</div>
 <div class="cd">
-  <div class="ct">Artículos con stock disperso en múltiples ubicaciones</div>
+  <div class="ct">Articulos con stock disperso en multiples ubicaciones</div>
   <div id="inc-db-body"></div>
 </div>
 </div>
-</div><img src="data:image/png;base64,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" alt="PRH"><span class="ftr-t">Dashboard Capacidad CD - Penguin Random House Grupo Editorial</span></div>
-<div id="tip"></div>
+</div>
+
+<div class="ftr"><img src="data:image/png;base64,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" alt="PRH"><span class="ftr-t">Dashboard Capacidad CD - Penguin Random House Grupo Editorial</span></div>
+<div id="tip" onclick="this.style.display='none'" style="cursor:pointer"></div>
+
 <script>
-const R={global:{OCUPADA:5542,VACIA:6846,FDS:184,UNIDADES:1404318},zonas:[{z:'PRS',o:2330,v:108,f:134,u:1060110},{z:'PMZ',o:3149,v:6731,f:0,u:307819},{z:'PGR',o:63,v:7,f:50,u:36389}],areas:[{a:'Rack Selectivo',z:'PRS',o:2330,v:108,f:134,u:1060110},{a:'Mezz. 1er Piso',z:'PMZ',o:1720,v:56,f:0,u:246962},{a:'Mezz. 2do Piso',z:'PMZ',o:1429,v:6675,f:0,u:60857},{a:'Rack Grilla',z:'PGR',o:63,v:7,f:50,u:36389}],niv:[{n:'N1',o:301,f:0},{n:'N2',o:417,f:0},{n:'N3',o:279,f:12},{n:'N4',o:270,f:10},{n:'N5',o:276,f:10},{n:'N6',o:273,f:17},{n:'N7',o:243,f:38},{n:'N8',o:210,f:33},{n:'N9',o:61,f:14}],hm:{PRS:[{p:'PRS01',o:229,v:11,f:119,u:96487},{p:'PRS02',o:354,v:24,f:15,u:180878},{p:'PRS03',o:376,v:18,f:0,u:181231},{p:'PRS04',o:373,v:19,f:0,u:163905},{p:'PRS05',o:379,v:15,f:0,u:162948},{p:'PRS06',o:225,v:3,f:0,u:96340},{p:'PRS07',o:69,v:2,f:0,u:33320},{p:'PRS08',o:85,v:3,f:0,u:36955},{p:'PRS09',o:85,v:3,f:0,u:38716},{p:'PRS10',o:78,v:4,f:0,u:35511},{p:'PRS11',o:77,v:6,f:0,u:33819}],PMZ:[{p:'PMZ01',o:65,v:1,f:0,u:23975},{p:'PMZ02',o:84,v:0,f:0,u:16034},{p:'PMZ03',o:84,v:0,f:0,u:13892},{p:'PMZ04',o:83,v:1,f:0,u:15255},{p:'PMZ05',o:83,v:1,f:0,u:14544},{p:'PMZ06',o:84,v:0,f:0,u:13761},{p:'PMZ07',o:84,v:0,f:0,u:15781},{p:'PMZ08',o:84,v:0,f:0,u:19122},{p:'PMZ09',o:167,v:1,f:0,u:18152},{p:'PMZ10',o:164,v:4,f:0,u:18387},{p:'PMZ11',o:163,v:5,f:0,u:18563},{p:'PMZ12',o:158,v:10,f:0,u:16961},{p:'PMZ13',o:202,v:14,f:0,u:17252},{p:'PMZ14',o:215,v:19,f:0,u:25283},{p:'PMZ15',o:141,v:199,f:0,u:16060},{p:'PMZ16',o:191,v:313,f:0,u:8134},{p:'PMZ17',o:274,v:342,f:0,u:7811},{p:'PMZ18',o:266,v:350,f:0,u:7805},{p:'PMZ19',o:285,v:331,f:0,u:11569},{p:'PMZ20',o:270,v:346,f:0,u:9467},{p:'PMZ21',o:2,v:614,f:0,u:11},{p:'PMZ22',o:0,v:616,f:0,u:0},{p:'PMZ23',o:0,v:616,f:0,u:0},{p:'PMZ24',o:0,v:616,f:0,u:0},{p:'PMZ25',o:0,v:616,f:0,u:0},{p:'PMZ26',o:0,v:616,f:0,u:0},{p:'PMZ27',o:0,v:528,f:0,u:0},{p:'PMZ28',o:0,v:572,f:0,u:0}],PGR:[{p:'PGR01',o:50,v:6,f:4,u:27835},{p:'PGR02',o:13,v:1,f:46,u:8554}]},incid_bar:90,incid_db:0,incid_bar_data:[{u:'PGR01-01-05-02',b:1,by:0,f:'0'},{u:'PGR01-02-03-01',b:1,by:0,f:'0'},{u:'PGR01-02-05-02',b:1,by:0,f:'0'},{u:'PGR01-03-02-02',b:1,by:0,f:'0'},{u:'PGR01-04-05-01',b:1,by:0,f:'0'},{u:'PGR01-05-06-02',b:1,by:0,f:'0'},{u:'PRS01-01-05-02',b:1,by:0,f:'0'},{u:'PRS01-01-07-01',b:1,by:0,f:'0'},{u:'PRS01-01-08-01',b:1,by:0,f:'0'},{u:'PRS01-01-08-02',b:1,by:0,f:'0'},{u:'PRS01-12-04-02',b:1,by:0,f:'0'},{u:'PRS01-13-05-01',b:1,by:0,f:'0'},{u:'PRS01-16-04-02',b:1,by:0,f:'0'},{u:'PRS01-18-03-01',b:1,by:0,f:'0'},{u:'PRS01-18-04-01',b:1,by:0,f:'0'},{u:'PRS01-18-05-02',b:1,by:0,f:'0'},{u:'PRS02-01-08-02',b:1,by:0,f:'0'},{u:'PRS02-02-05-01',b:1,by:0,f:'0'},{u:'PRS02-02-09-01',b:1,by:0,f:'0'},{u:'PRS02-03-08-01',b:1,by:0,f:'0'},{u:'PRS02-05-05-01',b:1,by:0,f:'0'},{u:'PRS02-05-07-01',b:1,by:0,f:'0'},{u:'PRS02-06-04-02',b:1,by:0,f:'0'},{u:'PRS02-06-08-02',b:1,by:0,f:'0'},{u:'PRS02-07-07-01',b:1,by:0,f:'0'},{u:'PRS02-07-08-01',b:1,by:0,f:'0'},{u:'PRS02-08-05-01',b:1,by:0,f:'0'},{u:'PRS02-09-04-01',b:1,by:0,f:'0'},{u:'PRS02-13-05-01',b:1,by:0,f:'0'},{u:'PRS02-17-07-02',b:1,by:0,f:'0'},{u:'PRS02-20-06-01',b:1,by:0,f:'0'},{u:'PRS02-20-07-02',b:1,by:0,f:'0'},{u:'PRS02-20-08-01',b:1,by:0,f:'0'},{u:'PRS02-22-06-01',b:1,by:0,f:'0'},{u:'PRS02-22-07-01',b:1,by:0,f:'0'},{u:'PRS02-22-08-02',b:1,by:0,f:'0'},{u:'PRS03-01-07-01',b:1,by:0,f:'0'},{u:'PRS03-02-06-01',b:1,by:0,f:'0'},{u:'PRS03-02-06-02',b:1,by:0,f:'0'},{u:'PRS03-02-09-01',b:1,by:0,f:'0'},{u:'PRS03-03-04-01',b:1,by:0,f:'0'},{u:'PRS03-03-09-02',b:1,by:0,f:'0'},{u:'PRS03-04-03-01',b:1,by:0,f:'0'},{u:'PRS03-04-04-01',b:1,by:0,f:'0'},{u:'PRS03-04-04-02',b:1,by:0,f:'0'},{u:'PRS03-04-06-01',b:1,by:0,f:'0'},{u:'PRS03-04-07-01',b:1,by:0,f:'0'},{u:'PRS03-08-04-01',b:1,by:0,f:'0'},{u:'PRS03-08-07-01',b:1,by:0,f:'0'},{u:'PRS03-20-08-01',b:1,by:0,f:'0'},{u:'PRS04-02-04-02',b:1,by:0,f:'0'},{u:'PRS04-02-06-02',b:1,by:0,f:'0'},{u:'PRS04-02-08-02',b:1,by:0,f:'0'},{u:'PRS04-03-03-01',b:1,by:0,f:'0'},{u:'PRS04-04-03-02',b:1,by:0,f:'0'},{u:'PRS04-05-03-01',b:1,by:0,f:'0'},{u:'PRS04-05-08-01',b:1,by:0,f:'0'},{u:'PRS04-06-05-01',b:1,by:0,f:'0'},{u:'PRS04-07-08-01',b:1,by:0,f:'0'},{u:'PRS04-09-08-01',b:1,by:0,f:'0'},{u:'PRS04-12-06-02',b:1,by:0,f:'0'},{u:'PRS04-17-08-02',b:1,by:0,f:'0'},{u:'PRS04-19-07-02',b:1,by:0,f:'0'},{u:'PRS04-20-07-02',b:1,by:0,f:'0'},{u:'PRS05-03-08-02',b:1,by:0,f:'0'},{u:'PRS05-04-03-01',b:1,by:0,f:'0'},{u:'PRS05-04-07-01',b:1,by:0,f:'0'},{u:'PRS05-05-08-01',b:1,by:0,f:'0'},{u:'PRS05-06-07-02',b:1,by:0,f:'0'},{u:'PRS05-08-06-01',b:1,by:0,f:'0'},{u:'PRS05-09-07-01',b:1,by:0,f:'0'},{u:'PRS05-18-08-02',b:1,by:0,f:'0'},{u:'PRS05-19-02-01',b:1,by:0,f:'0'},{u:'PRS05-19-03-01',b:1,by:0,f:'0'},{u:'PRS05-19-05-01',b:1,by:0,f:'0'},{u:'PRS05-20-05-02',b:1,by:0,f:'0'},{u:'PRS06-03-02-01',b:1,by:0,f:'0'},{u:'PRS06-13-04-01',b:1,by:0,f:'0'},{u:'PRS06-15-04-01',b:1,by:0,f:'0'},{u:'PRS07-01-03-02',b:1,by:0,f:'0'},{u:'PRS08-02-03-01',b:1,by:0,f:'0'},{u:'PRS08-04-04-02',b:1,by:0,f:'0'},{u:'PRS08-04-05-01',b:1,by:0,f:'0'},{u:'PRS09-02-05-01',b:1,by:0,f:'0'},{u:'PRS09-03-06-02',b:1,by:0,f:'0'},{u:'PRS09-06-05-01',b:1,by:0,f:'0'},{u:'PRS10-01-04-01',b:1,by:0,f:'0'},{u:'PRS10-01-04-02',b:1,by:0,f:'0'},{u:'PRS10-01-06-01',b:1,by:0,f:'0'},{u:'PRS10-04-03-02',b:1,by:0,f:'0'}],incid_db_data:[],des:{total_uni:843184,total_ped:14115,total_cli:357,prom_dia:10158,meses:['Ene','Feb','Mar'],mes_uni:[321159,240468,281557],mes_ped:[4225,4104,5786],clientes:[{n:'LIBRERIA ANTARTICA LTDA',v:138208,p:100},{n:'BUSCALIBRE SA',v:94935,p:69},{n:'NAN',v:64623,p:47},{n:'EDITORIAL CONTRAPUNTO',v:52523,p:38},{n:'LIBRERAA ANTARTICA LTDA',v:40433,p:29},{n:'FERIA CHILENA DEL LIBRO LTDA',v:38068,p:28},{n:'ADM DE VENTAS AL DETALLE LTDA',v:16610,p:12},{n:'LIBRENTA SPA',v:15462,p:11}],titulos:[{n:'GUERRA ENTRE HERMANOS',v:5382},{n:'NOVIO, EL',v:4941},{n:'KPOP DEMON HUNTERS LIBRO OFICIAL DE POST',v:4617},{n:'KPOP DEMON HUNTERS PARA LOS FANS',v:4541},{n:'CABALLERO DE LOS SIETE REINOS',v:4530},{n:'ASISTENTA, LA',v:4202},{n:'TINTA Y SANGRE',v:4125},{n:'OTRAS, LAS',v:3744},{n:'JUEGOS DEL HAMBRE 5: AMANECER EN LA COSE',v:3605},{n:'HARRY POTTER Y EL CALIZ DE FUEGO (HARRY',v:3472}],tipos_lbl:['Consignación','Serv. Nov. Consig.','Mov. Interno','Mueve Stock','Otros','Firme Sin Derecho','Consig. Prioritaria'],tipos_val:[292963,270890,115115,82523,26595,23167,17184]}};
+const R={global:{OCUPADA:0,VACIA:0,FDS:0,UNIDADES:0},zonas:[{z:'PRS',o:0,v:0,f:0,u:0},{z:'PMZ',o:0,v:0,f:0,u:0},{z:'PGR',o:0,v:0,f:0,u:0}],areas:[{a:'Rack Selectivo',z:'PRS',o:0,v:0,f:0,u:0},{a:'Mezz. 1er Piso',z:'PMZ',o:0,v:0,f:0,u:0},{a:'Mezz. 2do Piso',z:'PMZ',o:0,v:0,f:0,u:0},{a:'Rack Grilla',z:'PGR',o:0,v:0,f:0,u:0}],niv:[{n:'N1',o:0,f:0},{n:'N2',o:0,f:0},{n:'N3',o:0,f:0},{n:'N4',o:0,f:0},{n:'N5',o:0,f:0},{n:'N6',o:0,f:0},{n:'N7',o:0,f:0},{n:'N8',o:0,f:0},{n:'N9',o:0,f:0}],hm:{PRS:[],PMZ:[],PGR:[]},incid_bar:0,incid_db:0,incid_bar_data:[],incid_db_data:[],des:{total_uni:843184,total_ped:14115,total_cli:357,prom_dia:10158,meses:['Ene','Feb','Mar'],mes_uni:[321159,240468,281557],mes_ped:[4225,4104,5786],clientes:[{n:'LIBRERIA ANTARTICA LTDA',v:138208,p:100},{n:'BUSCALIBRE SA',v:94935,p:69},{n:'NAN',v:64623,p:47},{n:'EDITORIAL CONTRAPUNTO',v:52523,p:38},{n:'LIBRERAA ANTARTICA LTDA',v:40433,p:29},{n:'FERIA CHILENA DEL LIBRO LTDA',v:38068,p:28},{n:'ADM DE VENTAS AL DETALLE LTDA',v:16610,p:12},{n:'LIBRENTA SPA',v:15462,p:11}],titulos:[{n:'GUERRA ENTRE HERMANOS',v:5382},{n:'NOVIO, EL',v:4941},{n:'KPOP DEMON HUNTERS LIBRO OFICIAL DE POST',v:4617},{n:'KPOP DEMON HUNTERS PARA LOS FANS',v:4541},{n:'CABALLERO DE LOS SIETE REINOS',v:4530},{n:'ASISTENTA, LA',v:4202},{n:'TINTA Y SANGRE',v:4125},{n:'OTRAS, LAS',v:3744},{n:'JUEGOS DEL HAMBRE 5: AMANECER EN LA COSE',v:3605},{n:'HARRY POTTER Y EL CALIZ DE FUEGO (HARRY',v:3472}],cal_data:{"2026-01":{"2026-01-05":26570,"2026-01-06":17347,"2026-01-07":11495,"2026-01-08":9655,"2026-01-09":5181,"2026-01-10":8282,"2026-01-12":13619,"2026-01-13":75085,"2026-01-14":11613,"2026-01-15":15715,"2026-01-16":25601,"2026-01-17":7506,"2026-01-19":15230,"2026-01-20":10692,"2026-01-21":19038,"2026-01-22":23795,"2026-01-23":23411,"2026-01-26":297,"2026-01-28":540,"2026-01-29":16,"2026-01-30":471},"2026-02":{"2026-02-04":1246,"2026-02-05":15559,"2026-02-06":13265,"2026-02-09":10401,"2026-02-10":35943,"2026-02-11":12156,"2026-02-12":6155,"2026-02-13":9187,"2026-02-16":8770,"2026-02-17":12037,"2026-02-18":3154,"2026-02-19":11802,"2026-02-20":16105,"2026-02-21":6530,"2026-02-23":20414,"2026-02-24":21515,"2026-02-25":15118,"2026-02-26":14927,"2026-02-27":6184},"2026-03":{"2026-03-02":10110,"2026-03-03":25243,"2026-03-04":20150,"2026-03-05":10941,"2026-03-06":16097,"2026-03-09":7699,"2026-03-10":8075,"2026-03-11":8726,"2026-03-12":10338,"2026-03-13":9959,"2026-03-14":9892,"2026-03-16":4612,"2026-03-17":10058,"2026-03-18":35519,"2026-03-19":9059,"2026-03-20":12718,"2026-03-23":14290,"2026-03-24":12420,"2026-03-25":17911,"2026-03-26":13678,"2026-03-27":3330,"2026-03-28":10732}}}};
 Chart.defaults.font.family="'Barlow',sans-serif";Chart.defaults.color='#9A9A9A';
-const OR='#E8581A',AM='#F59E42',LG='#C8C8C8',PU='#7c3aed';
+const OR='#E8581A',AM='#F59E42',LG='#C8C8C8',PU='#7c3aed',BL='#185FA5';
 let aZ='TODAS',aS='TODOS';
+
+function showPage(p,b){document.querySelectorAll('.page').forEach(x=>x.classList.remove('act'));document.querySelectorAll('.tab').forEach(x=>x.classList.remove('act'));document.getElementById('page-'+p).classList.add('act');b.classList.add('act');}
 function sf(t,v,b){if(t==='z'){aZ=v;document.querySelectorAll('#zf .fb').forEach(x=>x.classList.remove('act'));}else{aS=v;document.querySelectorAll('#sf2 .fb').forEach(x=>x.classList.remove('act'));}b.classList.add('act');upd();upCh();}
-function gf(){let zs=R.zonas;if(aZ!=='TODAS')zs=zs.filter(x=>x.z===aZ);let o=zs.reduce((a,x)=>a+x.o,0),v=zs.reduce((a,x)=>a+x.v,0),f=zs.reduce((a,x)=>a+x.f,0),u=zs.reduce((a,x)=>a+x.u,0);if(aS==='OCUPADA'){v=0;f=0;u=zs.reduce((a,x)=>a+x.u,0);}if(aS==='VACIA'){o=0;f=0;u=0;}if(aS==='FUERA DE SISTEMA'){o=0;v=0;u=0;}return{o,v,f,u,tot:o+v+f};}
+function gf(){let zs=R.zonas;if(aZ!=='TODAS')zs=zs.filter(x=>x.z===aZ);let o=zs.reduce((a,x)=>a+x.o,0),v=zs.reduce((a,x)=>a+x.v,0),f=zs.reduce((a,x)=>a+x.f,0),u=zs.reduce((a,x)=>a+x.u,0);if(aS==='OCUPADA'){v=0;f=0;}if(aS==='VACIA'){o=0;f=0;u=0;}if(aS==='FUERA DE SISTEMA'){o=0;v=0;u=0;}return{o,v,f,u,tot:o+v+f};}
 function fmt(n){return Math.round(n).toLocaleString('es-CL');}
+function fmtK(n){if(n>=1000)return(n/1000).toFixed(1)+'K';return fmt(n);}
 function upd(){const{o,v,f,u,tot}=gf();document.getElementById('kt').textContent=fmt(tot);document.getElementById('kts').textContent=R.zonas.length+' zonas activas';document.getElementById('ko').textContent=fmt(o);document.getElementById('kv2').textContent=fmt(v);document.getElementById('kf').textContent=fmt(f);document.getElementById('kun').textContent=fmt(u);const pO=tot?(o/tot*100).toFixed(1):0,pV=tot?(v/tot*100).toFixed(1):0,pF=tot?(f/tot*100).toFixed(1):0;document.getElementById('kop').textContent=pO+'% del total';document.getElementById('kvp').textContent=pV+'% del total';document.getElementById('kfp').textContent=pF+'% requiere revision';document.getElementById('bo2').style.width=pO+'%';document.getElementById('bv').style.width=pV+'%';document.getElementById('bf').style.width=pF+'%';document.getElementById('dp').textContent=pO+'%';}
-let cD,cZ,cA,cN;
+let cD,cZ,cA,cN,cDes;
 function initCh(){const tot=R.global.OCUPADA+R.global.VACIA+R.global.FDS;cD=new Chart(document.getElementById('cD'),{type:'doughnut',data:{labels:['Ocupadas','Vacias','Fuera'],datasets:[{data:[R.global.OCUPADA,R.global.VACIA,R.global.FDS],backgroundColor:[OR,AM,LG],borderWidth:0,hoverOffset:5}]},options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${fmt(c.raw)} (${(c.raw/tot*100).toFixed(1)}%)`}}}}});
 const dl=document.getElementById('dleg');[['Ocupadas',OR,R.global.OCUPADA],['Vacias',AM,R.global.VACIA],['Fuera',LG,R.global.FDS]].forEach(([l,c,v])=>{dl.innerHTML+=`<div class="li"><div class="ls" style="background:${c}"></div>${l} <strong style="margin-left:3px;color:var(--tx)">${fmt(v)}</strong></div>`;});
 cZ=new Chart(document.getElementById('cZ'),{type:'bar',data:{labels:R.zonas.map(x=>x.z),datasets:[{label:'Ocupadas',data:R.zonas.map(x=>x.o),backgroundColor:OR,borderRadius:2},{label:'Vacias',data:R.zonas.map(x=>x.v),backgroundColor:AM,borderRadius:2},{label:'Fuera',data:R.zonas.map(x=>x.f),backgroundColor:LG,borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:8,font:{size:10}}}},scales:{x:{stacked:true,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10}}},y:{stacked:true,grid:{display:false},ticks:{font:{size:11}}}}}});
@@ -289,36 +277,9 @@ cN=new Chart(document.getElementById('cN'),{type:'bar',data:{labels:R.niv.map(x=
 function upCh(){const zs=aZ==='TODAS'?R.zonas:R.zonas.filter(x=>x.z===aZ);const o=zs.reduce((a,x)=>a+x.o,0),v=zs.reduce((a,x)=>a+x.v,0),f=zs.reduce((a,x)=>a+x.f,0);cD.data.datasets[0].data=[aS==='TODOS'||aS==='OCUPADA'?o:0,aS==='TODOS'||aS==='VACIA'?v:0,aS==='TODOS'||aS==='FUERA DE SISTEMA'?f:0];cD.update();}
 function hmc(p,hf){if(hf)return{bg:'#C8C8C8',tx:'#4A4A4A'};if(p>=90)return{bg:'#7a2a00',tx:'#ffdab9'};if(p>=70)return{bg:'#c04810',tx:'#ffe8d6'};if(p>=50)return{bg:'#e8581a',tx:'#fff5f0'};if(p>=30)return{bg:'#f0a060',tx:'#5a2000'};return{bg:'#f5cba7',tx:'#7a3a10'};}
 function shm(z,b){document.querySelectorAll('.ztb').forEach(x=>x.classList.remove('act'));b.classList.add('act');rhm(z);}
-function rhm(zone){const d=R.hm[zone];const cols=zone==='PMZ'?7:zone==='PRS'?6:2;const g=document.getElementById('hmg');g.innerHTML='';const gr=document.createElement('div');gr.className='hmg';gr.style.gridTemplateColumns=`repeat(${cols},minmax(0,1fr))`;d.forEach(r=>{const tot=r.o+r.f+r.v;const p=tot?Math.round(r.o/tot*100):0;const c=hmc(p,r.f>0);const cell=document.createElement('div');cell.className='hmc';cell.style.background=c.bg;cell.innerHTML=`<div class="hmp" style="color:${c.tx}">${r.p}</div><div class="hmpct" style="color:${c.tx}">${p}%</div><div class="hmn" style="color:${c.tx}">${fmt(r.o)}</div>`;cell.addEventListener('mousemove',e=>{const pV=tot?Math.round(r.v/tot*100):0,pF=tot?Math.round(r.f/tot*100):0;const t=document.getElementById('tip');t.style.display='block';t.style.left=(e.clientX+14)+'px';t.style.top=(e.clientY-10)+'px';const uStr=r.u>0?`<div class="tr2"><span>Unidades</span><span>${fmt(r.u)}</span></div>`:'';t.innerHTML=`<div class="tt">${r.p}</div><div class="tr2"><span>Ocupadas</span><span>${fmt(r.o)} (${p}%)</span></div><div class="tr2"><span>Vacias</span><span>${fmt(r.v)} (${pV}%)</span></div><div class="tr2"><span>Fuera sistema</span><span>${r.f} (${pF}%)</span></div>${uStr}<div class="tr2"><span>Total</span><span>${fmt(tot)}</span></div>`;});cell.addEventListener('mouseleave',()=>{document.getElementById('tip').style.display='none';});gr.appendChild(cell);});g.appendChild(gr);}
+function rhm(zone){const d=R.hm[zone];const cols=zone==='PMZ'?7:zone==='PRS'?6:2;const g=document.getElementById('hmg');g.innerHTML='';const gr=document.createElement('div');gr.className='hmg';gr.style.gridTemplateColumns=`repeat(${cols},minmax(0,1fr))`;d.forEach(r=>{const tot=r.o+r.f+r.v;const p=tot?Math.round(r.o/tot*100):0;const c=hmc(p,r.f>0);const cell=document.createElement('div');cell.className='hmc';cell.style.background=c.bg;cell.innerHTML=`<div class="hmp" style="color:${c.tx}">${r.p}</div><div class="hmpct" style="color:${c.tx}">${p}%</div><div class="hmn" style="color:${c.tx}">${fmt(r.o)}</div>`;cell.addEventListener('mousemove',e=>{const pV=tot?Math.round(r.v/tot*100):0,pF=tot?Math.round(r.f/tot*100):0;const t=document.getElementById('tip');t.style.display='block';t.style.left=(e.clientX+14)+'px';t.style.top=(e.clientY-10)+'px';t.style.transform='none';const uStr=r.u>0?`<div class="tr2"><span>Unidades</span><span>${fmt(r.u)}</span></div>`:'';t.innerHTML=`<div class="tt">${r.p}</div><div class="tr2"><span>Ocupadas</span><span>${fmt(r.o)} (${p}%)</span></div><div class="tr2"><span>Vacias</span><span>${fmt(r.v)} (${pV}%)</span></div><div class="tr2"><span>Fuera sistema</span><span>${r.f} (${pF}%)</span></div>${uStr}<div class="tr2"><span>Total</span><span>${fmt(tot)}</span></div>`;});cell.addEventListener('mouseleave',()=>{document.getElementById('tip').style.display='none';});gr.appendChild(cell);});g.appendChild(gr);}
 function rtbl(){const tb=document.getElementById('dtb');R.areas.forEach(r=>{const tot=r.o+r.v+r.f;const p=tot?(r.o/tot*100).toFixed(1):0;const tr=document.createElement('tr');const uStr=r.u>0?`<span class="bo">${fmt(r.u)}</span>`:'-';tr.innerHTML=`<td style="font-weight:600">${r.a}</td><td><span class="bg2">${r.z}</span></td><td><span class="bo">${fmt(r.o)}</span></td><td><span class="ba">${fmt(r.v)}</span></td><td><span class="bg2">${r.f}</span></td><td style="font-weight:600">${fmt(tot)}</td><td>${uStr}</td><td><div style="font-size:11px;font-weight:700;color:var(--or)">${p}%</div><div class="pb"><div class="pi" style="width:${p}%"></div></div></td>`;tb.appendChild(tr);});const tO=R.areas.reduce((a,r)=>a+r.o,0),tV=R.areas.reduce((a,r)=>a+r.v,0),tF=R.areas.reduce((a,r)=>a+r.f,0),tU=R.areas.reduce((a,r)=>a+r.u,0),tot=tO+tV+tF;const tr=document.createElement('tr');tr.className='tr';tr.innerHTML=`<td>TOTAL GENERAL</td><td>-</td><td>${fmt(tO)}</td><td>${fmt(tV)}</td><td>${fmt(tF)}</td><td>${fmt(tot)}</td><td>${fmt(tU)}</td><td>${(tO/tot*100).toFixed(1)}%</td>`;document.getElementById('dtb').appendChild(tr);}
-function showPage(p,b){document.querySelectorAll('.page').forEach(x=>x.classList.remove('act'));document.querySelectorAll('.tab').forEach(x=>x.classList.remove('act'));document.getElementById('page-'+p).classList.add('act');b.classList.add('act');}
-function loadIncidencias(){
-  document.getElementById('ib-cnt').textContent=fmt(R.incid_bar);
-  document.getElementById('idb-cnt').textContent=fmt(R.incid_db);
-  const badge=document.getElementById('inc-badge');
-  const total=R.incid_bar+R.incid_db;
-  badge.textContent=total>0?total:'';
-  // Barrido table
-  const barBody=document.getElementById('inc-bar-body');
-  if(R.incid_bar_data && R.incid_bar_data.length>0){
-    let t='<table class="inc-tbl"><thead><tr><th>Ubicación</th><th>Barrido</th><th>BY</th><th>Fuera Sistema</th><th>Estado</th></tr></thead><tbody>';
-    R.incid_bar_data.forEach(r=>{t+=`<tr><td style="font-weight:600">${r.u}</td><td style="text-align:center">${r.b}</td><td style="text-align:center">${r.by}</td><td style="text-align:center">${r.f}</td><td><span class="inc-badge">PALLET MAL UBICADO</span></td></tr>`;});
-    t+='</tbody></table>';barBody.innerHTML=t;
-  } else {barBody.innerHTML='<div class="no-inc">✓ Sin incidencias de barrido en los datos actuales</div>';}
-  // DB table
-  const dbBody=document.getElementById('inc-db-body');
-  if(R.incid_db_data && R.incid_db_data.length>0){
-    let t='<table class="inc-tbl db"><thead><tr><th>Código</th><th>Descripción</th><th>N° Ubicaciones</th><th>Ubicaciones</th><th>Cantidad</th></tr></thead><tbody>';
-    R.incid_db_data.forEach(r=>{t+=`<tr><td style="font-weight:600">${r.c}</td><td>${r.d}</td><td style="text-align:center"><span class="inc-badge db">${r.n}</span></td><td style="font-size:10px">${r.u}</td><td style="text-align:center">${fmt(r.q)}</td></tr>`;});
-    t+='</tbody></table>';dbBody.innerHTML=t;
-  } else {dbBody.innerHTML='<div class="no-inc" style="background:#fff8f5;color:#c04810">✓ Sin códigos duplicados en PMZ Piso 1 en los datos actuales</div>';}
-}
-function updClk(){document.getElementById('clk').textContent=new Date().toLocaleString('es-CL',{dateStyle:'short',timeStyle:'short'});}
-setInterval(updClk,1000);updClk();
-initCh();rhm('PRS');rtbl();upd();loadIncidencias();initDespachos();
 
-// Despachos charts
-let cDes, cTipo;
 function initDespachos(){
   if(!R.des){document.getElementById('d-uni').textContent='Sin datos';return;}
   const d=R.des;
@@ -329,15 +290,98 @@ function initDespachos(){
   document.getElementById('d-rng').textContent=d.meses[0]+' - '+d.meses[d.meses.length-1]+' 2026';
   const colors=['#185FA5','#2276C7','#1A6BB8','#1060A0','#0D5090','#0A4080','#073070','#052060','#4A90D9','#6AA8E8','#85BEF0','#A0D0FF'];
   cDes=new Chart(document.getElementById('cDes'),{type:'bar',data:{labels:d.meses,datasets:[{label:'Unidades',data:d.mes_uni,backgroundColor:colors.slice(0,d.meses.length),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)+' unidades'}}},scales:{y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{callback:v=>fmt(v),font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:11}}}}}});
-  let ct='<table class="des-tbl"><thead><tr><th>#</th><th>Cliente</th><th>Unidades</th><th>%</th></tr></thead><tbody>';
-  d.clientes.forEach((c,i)=>{ct+=`<tr><td>${i+1}</td><td>${c.n}</td><td>${fmt(c.v)}</td><td><div class="des-bar-h"><div class="des-bar-f" style="width:${c.p}%"></div></div></td></tr>`;});
+  let ct='<table class="des-tbl"><thead><tr><th>#</th><th>Cliente</th><th>Unidades</th><th>% Total</th></tr></thead><tbody>';
+  d.clientes.forEach((c,i)=>{ct+=`<tr><td style="text-align:center">${i+1}</td><td>${c.n}</td><td style="text-align:right">${fmt(c.v)}</td><td><div class="des-bar-h"><div class="des-bar-f" style="width:${c.p}%"></div></div></td></tr>`;});
   ct+='</tbody></table>';document.getElementById('d-cli-tbl').innerHTML=ct;
   let tt='<table class="des-tbl"><thead><tr><th>#</th><th>Titulo</th><th>Unidades</th></tr></thead><tbody>';
-  d.titulos.forEach((t,i)=>{tt+=`<tr><td>${i+1}</td><td>${t.n}</td><td>${fmt(t.v)}</td></tr>`;});
+  d.titulos.forEach((t,i)=>{tt+=`<tr><td style="text-align:center">${i+1}</td><td>${t.n}</td><td style="text-align:right">${fmt(t.v)}</td></tr>`;});
   tt+='</tbody></table>';document.getElementById('d-tit-tbl').innerHTML=tt;
-  const tc=['#185FA5','#2276C7','#E8581A','#888888','#F59E42','#4A4A4A','#7c3aed'];
-  cTipo=new Chart(document.getElementById('cTipo'),{type:'bar',data:{labels:d.tipos_lbl,datasets:[{label:'Unidades',data:d.tipos_val,backgroundColor:tc.slice(0,d.tipos_lbl.length),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)+' unidades'}}},scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{callback:v=>fmt(v),font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+  buildCalendar();
 }
+
+function buildCalendar(){
+  if(!R.des||!R.des.cal_data) return;
+  const sel=document.getElementById('d-cal-mes');
+  const mesKey=sel?sel.value:'2026-03';
+  const diasData=R.des.cal_data[mesKey]||{};
+  const fechas=Object.keys(diasData);
+  const cont=document.getElementById('d-cal');
+  if(!fechas.length){cont.innerHTML='<div style="text-align:center;padding:20px;color:#888">Sin datos para este mes</div>';return;}
+  const maxVal=Math.max(...Object.values(diasData));
+  const parts=mesKey.split('-');
+  const year=parseInt(parts[0]),month=parseInt(parts[1])-1;
+  const diasEnMes=new Date(year,month+1,0).getDate();
+  const primerDiaSemana=new Date(year,month,1).getDay();
+  let html='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:6px">';
+  ['Dom','Lun','Mar','Mie','Jue','Vie','Sab'].forEach(d=>{html+=`<div style="text-align:center;font-size:10px;font-weight:700;color:#888;padding:4px 0">${d}</div>`;});
+  html+='</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">';
+  for(let i=0;i<primerDiaSemana;i++) html+='<div style="height:48px"></div>';
+  for(let dia=1;dia<=diasEnMes;dia++){
+    const fecha=`${year}-${String(month+1).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+    const val=diasData[fecha]||0;
+    const pct=maxVal>0?val/maxVal:0;
+    const semana=new Date(year,month,dia).getDay();
+    const esFind=(semana===0||semana===6);
+    let bg,tx;
+    if(val===0){bg=esFind?'#f8f0f0':'#f4f4f4';tx=esFind?'#d0a0a0':'#ccc';}
+    else if(pct>=0.8){bg='#0D5090';tx='white';}
+    else if(pct>=0.6){bg='#185FA5';tx='white';}
+    else if(pct>=0.4){bg='#2276C7';tx='white';}
+    else if(pct>=0.2){bg='#5B9BD5';tx='white';}
+    else{bg='#A8C8F0';tx='#185FA5';}
+    html+=`<div onclick="showDayDetail('${fecha}',${val})" title="${fecha}: ${fmt(val)} unidades" style="background:${bg};border-radius:4px;height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:${val>0?'pointer':'default'};border:1px solid ${esFind?'#e8d0d0':'#e8e8e8'};transition:transform .1s" onmouseover="${val>0?"this.style.transform='scale(1.08)'":''}'" onmouseout="this.style.transform='scale(1)'">
+      <div style="font-size:11px;font-weight:700;color:${tx}">${dia}</div>
+      <div style="font-size:9px;color:${tx};opacity:.85">${val>0?fmtK(val):''}</div>
+    </div>`;
+  }
+  html+='</div>';
+  html+=`<div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap;align-items:center">
+    <span style="font-size:10px;color:#888;font-weight:600">Volumen diario:</span>
+    <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#888"><div style="width:12px;height:12px;background:#A8C8F0;border-radius:2px"></div>Bajo</div>
+    <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#888"><div style="width:12px;height:12px;background:#2276C7;border-radius:2px"></div>Medio</div>
+    <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#888"><div style="width:12px;height:12px;background:#0D5090;border-radius:2px"></div>Alto</div>
+    <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#888"><div style="width:12px;height:12px;background:#f8f0f0;border:1px solid #e8d0d0;border-radius:2px"></div>Fin semana sin despacho</div>
+  </div>`;
+  cont.innerHTML=html;
+}
+
+function showDayDetail(fecha,total){
+  if(total===0) return;
+  const tip=document.getElementById('tip');
+  const parts=fecha.split('-');
+  const dias=['Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado'];
+  const diaSem=dias[new Date(fecha).getDay()];
+  tip.style.display='block';tip.style.position='fixed';
+  tip.style.left='50%';tip.style.top='auto';tip.style.bottom='80px';
+  tip.style.transform='translateX(-50%)';tip.style.pointerEvents='auto';
+  tip.innerHTML=`<div class="tt">📅 ${diaSem} ${parts[2]}/${parts[1]}/${parts[0]}</div>
+    <div class="tr2"><span>Unidades despachadas</span><span style="font-size:14px;font-weight:700">${fmt(total)}</span></div>
+    <div style="margin-top:8px;text-align:center;font-size:10px;color:#888;cursor:pointer;text-decoration:underline" onclick="document.getElementById('tip').style.display='none'">cerrar</div>`;
+}
+
+function loadIncidencias(){
+  document.getElementById('ib-cnt').textContent=fmt(R.incid_bar);
+  document.getElementById('idb-cnt').textContent=fmt(R.incid_db);
+  const badge=document.getElementById('inc-badge');
+  const total=R.incid_bar+R.incid_db;
+  badge.textContent=total>0?total:'';
+  const barBody=document.getElementById('inc-bar-body');
+  if(R.incid_bar_data&&R.incid_bar_data.length>0){
+    let t='<table class="inc-tbl"><thead><tr><th>Ubicacion</th><th>Barrido</th><th>BY</th><th>Fuera Sistema</th><th>Estado</th></tr></thead><tbody>';
+    R.incid_bar_data.forEach(r=>{t+=`<tr><td style="font-weight:600">${r.u}</td><td style="text-align:center">${r.b}</td><td style="text-align:center">${r.by}</td><td style="text-align:center">${r.f}</td><td><span class="inc-badge">PALLET MAL UBICADO</span></td></tr>`;});
+    t+='</tbody></table>';barBody.innerHTML=t;
+  } else {barBody.innerHTML='<div class="no-inc">Sin incidencias de barrido en los datos actuales</div>';}
+  const dbBody=document.getElementById('inc-db-body');
+  if(R.incid_db_data&&R.incid_db_data.length>0){
+    let t='<table class="inc-tbl db"><thead><tr><th>Codigo</th><th>Descripcion</th><th>N Ubic.</th><th>Ubicaciones</th><th>Cantidad</th></tr></thead><tbody>';
+    R.incid_db_data.forEach(r=>{t+=`<tr><td style="font-weight:600">${r.c}</td><td>${r.d}</td><td style="text-align:center"><span class="inc-badge db">${r.n}</span></td><td style="font-size:10px">${r.u}</td><td style="text-align:center">${fmt(r.q)}</td></tr>`;});
+    t+='</tbody></table>';dbBody.innerHTML=t;
+  } else {dbBody.innerHTML='<div class="no-inc" style="background:#fff8f5;color:#c04810">Sin codigos duplicados en PMZ Piso 1</div>';}
+}
+
+function updClk(){document.getElementById('clk').textContent=new Date().toLocaleString('es-CL',{dateStyle:'short',timeStyle:'short'});}
+setInterval(updClk,1000);updClk();
+initCh();rhm('PRS');rtbl();upd();loadIncidencias();initDespachos();
 </script>
 </body>
 </html>
