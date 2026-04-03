@@ -197,6 +197,15 @@ body{font-family:"Barlow",sans-serif;background:var(--bg);color:var(--tx)}
 <!-- DESPACHOS -->
 <div id="page-des" class="page">
 <div class="main">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+  <div style="display:flex;align-items:center;gap:8px">
+    <span style="font-size:11px;font-weight:700;color:var(--gym);text-transform:uppercase;letter-spacing:.06em">Filtrar por mes</span>
+    <select id="d-mes-filter" onchange="filtrarMes()" style="border:1.5px solid #185FA5;border-radius:4px;padding:5px 14px;font-size:12px;font-family:Arial;color:#185FA5;cursor:pointer;background:white;font-weight:600">
+      <option value="TODOS">Todos los meses</option>
+    </select>
+  </div>
+  <div style="font-size:11px;color:var(--gym)" id="d-periodo">Ene - Mar 2026</div>
+</div>
 <div class="des-kg">
   <div class="des-kc"><div class="des-kl">Unidades Despachadas</div><div class="des-kv" id="d-uni">—</div><div class="des-ks" id="d-rng">cargando...</div></div>
   <div class="des-kc"><div class="des-kl">Pedidos</div><div class="des-kv" id="d-ped">—</div><div class="des-ks">ordenes unicas</div></div>
@@ -242,7 +251,7 @@ body{font-family:"Barlow",sans-serif;background:var(--bg);color:var(--tx)}
 </div>
 <div class="stl">Incidencias Barrido — Pallets mal ubicados</div>
 <div class="cd" style="margin-bottom:16px">
-  <div class="ct">Barrido=1 · BY=0 · Sin fuera de sistema</div>
+  <div class="ct">Ubicaciones con pallet mal ubicado segun barrido</div>
   <div id="inc-bar-body"></div>
 </div>
 <div class="stl">Incidencias D.B — Codigos en mas de 1 ubicacion (PMZ Piso 1)</div>
@@ -280,23 +289,89 @@ function shm(z,b){document.querySelectorAll('.ztb').forEach(x=>x.classList.remov
 function rhm(zone){const d=R.hm[zone];const cols=zone==='PMZ'?7:zone==='PRS'?6:2;const g=document.getElementById('hmg');g.innerHTML='';const gr=document.createElement('div');gr.className='hmg';gr.style.gridTemplateColumns=`repeat(${cols},minmax(0,1fr))`;d.forEach(r=>{const tot=r.o+r.f+r.v;const p=tot?Math.round(r.o/tot*100):0;const c=hmc(p,r.f>0);const cell=document.createElement('div');cell.className='hmc';cell.style.background=c.bg;cell.innerHTML=`<div class="hmp" style="color:${c.tx}">${r.p}</div><div class="hmpct" style="color:${c.tx}">${p}%</div><div class="hmn" style="color:${c.tx}">${fmt(r.o)}</div>`;cell.addEventListener('mousemove',e=>{const pV=tot?Math.round(r.v/tot*100):0,pF=tot?Math.round(r.f/tot*100):0;const t=document.getElementById('tip');t.style.display='block';t.style.left=(e.clientX+14)+'px';t.style.top=(e.clientY-10)+'px';t.style.transform='none';const uStr=r.u>0?`<div class="tr2"><span>Unidades</span><span>${fmt(r.u)}</span></div>`:'';t.innerHTML=`<div class="tt">${r.p}</div><div class="tr2"><span>Ocupadas</span><span>${fmt(r.o)} (${p}%)</span></div><div class="tr2"><span>Vacias</span><span>${fmt(r.v)} (${pV}%)</span></div><div class="tr2"><span>Fuera sistema</span><span>${r.f} (${pF}%)</span></div>${uStr}<div class="tr2"><span>Total</span><span>${fmt(tot)}</span></div>`;});cell.addEventListener('mouseleave',()=>{document.getElementById('tip').style.display='none';});gr.appendChild(cell);});g.appendChild(gr);}
 function rtbl(){const tb=document.getElementById('dtb');R.areas.forEach(r=>{const tot=r.o+r.v+r.f;const p=tot?(r.o/tot*100).toFixed(1):0;const tr=document.createElement('tr');const uStr=r.u>0?`<span class="bo">${fmt(r.u)}</span>`:'-';tr.innerHTML=`<td style="font-weight:600">${r.a}</td><td><span class="bg2">${r.z}</span></td><td><span class="bo">${fmt(r.o)}</span></td><td><span class="ba">${fmt(r.v)}</span></td><td><span class="bg2">${r.f}</span></td><td style="font-weight:600">${fmt(tot)}</td><td>${uStr}</td><td><div style="font-size:11px;font-weight:700;color:var(--or)">${p}%</div><div class="pb"><div class="pi" style="width:${p}%"></div></div></td>`;tb.appendChild(tr);});const tO=R.areas.reduce((a,r)=>a+r.o,0),tV=R.areas.reduce((a,r)=>a+r.v,0),tF=R.areas.reduce((a,r)=>a+r.f,0),tU=R.areas.reduce((a,r)=>a+r.u,0),tot=tO+tV+tF;const tr=document.createElement('tr');tr.className='tr';tr.innerHTML=`<td>TOTAL GENERAL</td><td>-</td><td>${fmt(tO)}</td><td>${fmt(tV)}</td><td>${fmt(tF)}</td><td>${fmt(tot)}</td><td>${fmt(tU)}</td><td>${(tO/tot*100).toFixed(1)}%</td>`;document.getElementById('dtb').appendChild(tr);}
 
+const MES_NOM={'2026-01':'Enero 2026','2026-02':'Febrero 2026','2026-03':'Marzo 2026','2026-04':'Abril 2026','2026-05':'Mayo 2026','2026-06':'Junio 2026','2026-07':'Julio 2026','2026-08':'Agosto 2026','2026-09':'Septiembre 2026','2026-10':'Octubre 2026','2026-11':'Noviembre 2026','2026-12':'Diciembre 2026'};
+
 function initDespachos(){
   if(!R.des){document.getElementById('d-uni').textContent='Sin datos';return;}
   const d=R.des;
-  document.getElementById('d-uni').textContent=fmt(d.total_uni);
-  document.getElementById('d-ped').textContent=fmt(d.total_ped);
-  document.getElementById('d-cli').textContent=fmt(d.total_cli);
-  document.getElementById('d-prom').textContent=fmt(d.prom_dia);
-  document.getElementById('d-rng').textContent=d.meses[0]+' - '+d.meses[d.meses.length-1]+' 2026';
-  const colors=['#185FA5','#2276C7','#1A6BB8','#1060A0','#0D5090','#0A4080','#073070','#052060','#4A90D9','#6AA8E8','#85BEF0','#A0D0FF'];
-  cDes=new Chart(document.getElementById('cDes'),{type:'bar',data:{labels:d.meses,datasets:[{label:'Unidades',data:d.mes_uni,backgroundColor:colors.slice(0,d.meses.length),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)+' unidades'}}},scales:{y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{callback:v=>fmt(v),font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:11}}}}}});
-  let ct='<table class="des-tbl"><thead><tr><th>#</th><th>Cliente</th><th>Unidades</th><th>% Total</th></tr></thead><tbody>';
+  
+  // Populate month selector
+  const sel=document.getElementById('d-mes-filter');
+  if(d.meses_full){
+    d.meses_full.forEach(m=>{
+      const opt=document.createElement('option');
+      opt.value=m; opt.textContent=MES_NOM[m]||m;
+      sel.appendChild(opt);
+    });
+    // Set calendar selector options too
+    const calSel=document.getElementById('d-cal-mes');
+    calSel.innerHTML='';
+    d.meses_full.forEach((m,i)=>{
+      const opt=document.createElement('option');
+      opt.value=m; opt.textContent=MES_NOM[m]||m;
+      if(i===d.meses_full.length-1) opt.selected=true;
+      calSel.appendChild(opt);
+    });
+  }
+  
+  actualizarKPIs('TODOS');
+  renderChartMes('TODOS');
+  renderTablas('TODOS');
+  buildCalendar();
+}
+
+function filtrarMes(){
+  const mes=document.getElementById('d-mes-filter').value;
+  actualizarKPIs(mes);
+  renderChartMes(mes);
+  renderTablas(mes);
+}
+
+function actualizarKPIs(mes){
+  const d=R.des;
+  if(mes==='TODOS'){
+    document.getElementById('d-uni').textContent=fmt(d.total_uni);
+    document.getElementById('d-ped').textContent=fmt(d.total_ped);
+    document.getElementById('d-cli').textContent=fmt(d.total_cli);
+    document.getElementById('d-prom').textContent=fmt(d.prom_dia);
+    document.getElementById('d-rng').textContent='Acumulado '+d.meses[0]+' - '+d.meses[d.meses.length-1];
+    document.getElementById('d-periodo').textContent=d.meses[0]+' - '+d.meses[d.meses.length-1]+' 2026';
+  } else {
+    const idx=d.meses_full?d.meses_full.indexOf(mes):-1;
+    const uni=idx>=0?d.mes_uni[idx]:0;
+    const calDias=d.cal_data[mes]?Object.keys(d.cal_data[mes]).length:1;
+    document.getElementById('d-uni').textContent=fmt(uni);
+    document.getElementById('d-ped').textContent='—';
+    document.getElementById('d-cli').textContent='—';
+    document.getElementById('d-prom').textContent=fmt(Math.round(uni/calDias));
+    document.getElementById('d-rng').textContent=MES_NOM[mes]||mes;
+    document.getElementById('d-periodo').textContent=MES_NOM[mes]||mes;
+  }
+}
+
+function renderChartMes(mes){
+  const d=R.des;
+  const colors=['#185FA5','#2276C7','#1A6BB8','#1060A0','#0D5090','#0A4080','#073070','#052060'];
+  if(cDes) cDes.destroy();
+  if(mes==='TODOS'){
+    cDes=new Chart(document.getElementById('cDes'),{type:'bar',data:{labels:d.meses,datasets:[{label:'Unidades',data:d.mes_uni,backgroundColor:colors.slice(0,d.meses.length),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)+' unidades'}}},scales:{y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{callback:v=>fmt(v),font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:11}}}}}});
+  } else {
+    const diasData=d.cal_data[mes]||{};
+    const dias=Object.keys(diasData).sort();
+    const vals=dias.map(d2=>diasData[d2]);
+    const labels=dias.map(d2=>d2.split('-')[2]);
+    cDes=new Chart(document.getElementById('cDes'),{type:'bar',data:{labels,datasets:[{label:'Unidades',data:vals,backgroundColor:'#185FA5',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)+' unidades',title:t=>dias[t[0].dataIndex]}}},scales:{y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{callback:v=>fmt(v),font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:9},maxRotation:0}}}}});
+  }
+}
+
+function renderTablas(mes){
+  const d=R.des;
+  let ct='<table class="des-tbl"><thead><tr><th>#</th><th>Cliente</th><th>Unidades</th><th>%</th></tr></thead><tbody>';
   d.clientes.forEach((c,i)=>{ct+=`<tr><td style="text-align:center">${i+1}</td><td>${c.n}</td><td style="text-align:right">${fmt(c.v)}</td><td><div class="des-bar-h"><div class="des-bar-f" style="width:${c.p}%"></div></div></td></tr>`;});
   ct+='</tbody></table>';document.getElementById('d-cli-tbl').innerHTML=ct;
   let tt='<table class="des-tbl"><thead><tr><th>#</th><th>Titulo</th><th>Unidades</th></tr></thead><tbody>';
   d.titulos.forEach((t,i)=>{tt+=`<tr><td style="text-align:center">${i+1}</td><td>${t.n}</td><td style="text-align:right">${fmt(t.v)}</td></tr>`;});
   tt+='</tbody></table>';document.getElementById('d-tit-tbl').innerHTML=tt;
-  buildCalendar();
 }
 
 function buildCalendar(){
@@ -367,8 +442,8 @@ function loadIncidencias(){
   badge.textContent=total>0?total:'';
   const barBody=document.getElementById('inc-bar-body');
   if(R.incid_bar_data&&R.incid_bar_data.length>0){
-    let t='<table class="inc-tbl"><thead><tr><th>Ubicacion</th><th>Barrido</th><th>BY</th><th>Fuera Sistema</th><th>Estado</th></tr></thead><tbody>';
-    R.incid_bar_data.forEach(r=>{t+=`<tr><td style="font-weight:600">${r.u}</td><td style="text-align:center">${r.b}</td><td style="text-align:center">${r.by}</td><td style="text-align:center">${r.f}</td><td><span class="inc-badge">PALLET MAL UBICADO</span></td></tr>`;});
+    let t='<table class="inc-tbl"><thead><tr><th>#</th><th>Ubicacion</th><th>Estado</th></tr></thead><tbody>';
+    R.incid_bar_data.forEach((r,i)=>{t+=`<tr><td style="text-align:center">${i+1}</td><td style="font-weight:600">${r.u}</td><td><span class="inc-badge">${r.e||'PALLET MAL UBICADO'}</span></td></tr>`;});
     t+='</tbody></table>';barBody.innerHTML=t;
   } else {barBody.innerHTML='<div class="no-inc">Sin incidencias de barrido en los datos actuales</div>';}
   const dbBody=document.getElementById('inc-db-body');
