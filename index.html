@@ -255,12 +255,12 @@ body{font-family:"Barlow",sans-serif;background:var(--bg);color:var(--tx)}
 <div id="page-inc" class="page">
 <div class="main">
 <div class="inc-kpi">
-  <div class="inc-kc"><div class="inc-ico">⚠️</div><div><div class="inc-lbl">Incidencias Barrido</div><div class="inc-val" id="ib-cnt">0</div><div class="inc-sub">Pallets mal ubicados</div></div></div>
+  <div class="inc-kc"><div class="inc-ico">⚠️</div><div><div class="inc-lbl">Incidencias Barrido</div><div class="inc-val" id="ib-cnt">0</div><div class="inc-sub">Palets mal ubicados</div></div></div>
   <div class="inc-kc db"><div class="inc-ico">🔍</div><div><div class="inc-lbl">Artículos en +1 Ubicación</div><div class="inc-val db" id="idb-cnt">0</div><div class="inc-sub">ZM Mezzanine Piso 1 + ZM Rack Selectivo Picking</div></div></div>
 </div>
-<div class="stl">Incidencias Barrido — Pallets mal ubicados</div>
+<div class="stl">Incidencias Barrido — Palets mal ubicados</div>
 <div class="cd" style="margin-bottom:16px">
-  <div class="ct">Ubicaciones con pallet mal ubicado segun barrido</div>
+  <div class="ct">Ubicaciones con palet mal ubicado segun barrido</div>
   <div id="inc-bar-body"></div>
 </div>
 <div class="stl">Incidencias D.B — ZM Mezzanine Piso 1 + ZM Rack Selectivo Picking (PMZ Piso 1)</div>
@@ -388,7 +388,7 @@ function loadIncidencias(){
   const barBody=document.getElementById('inc-bar-body');
   if(R.incid_bar_data&&R.incid_bar_data.length>0){
     let t='<table class="inc-tbl"><thead><tr><th>#</th><th>Ubicacion</th><th>Estado</th></tr></thead><tbody>';
-    R.incid_bar_data.forEach((r,i)=>{t+=`<tr><td style="text-align:center">${i+1}</td><td style="font-weight:600">${r.u}</td><td><span class="inc-badge">PALLET MAL UBICADO</span></td></tr>`;});
+    R.incid_bar_data.forEach((r,i)=>{t+=`<tr><td style="text-align:center">${i+1}</td><td style="font-weight:600">${r.u}</td><td><span class="inc-badge">PALET MAL UBICADO</span></td></tr>`;});
     t+='</tbody></table>';barBody.innerHTML=t;
   } else {barBody.innerHTML='<div class="no-inc">Sin incidencias de barrido en los datos actuales</div>';}
   const dbBody=document.getElementById('inc-db-body');
